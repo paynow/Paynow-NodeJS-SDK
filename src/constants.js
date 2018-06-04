@@ -9,5 +9,5 @@ const  RESPONSE_AWAITING_REDIRECT = 'awaiting redirect';
 const  RESPONSE_AWAITING_DELIVERY = 'awaiting delivery';
 const  RESPONSE_CREATED_NOT_PAID = 'created but not paid';
 
-const  URL_INITIATE_TRANSACTION = 'https://paynow.webdevworld.com/interface/initiatetransaction';
-const  URL_INITIATE_MOBILE_TRANSACTION = 'https://paynow.webdevworld.com/interface/remotetransaction';
+const  URL_INITIATE_TRANSACTION = 'https://www.paynow.co.zw/interface/initiatetransaction';
+const  URL_INITIATE_MOBILE_TRANSACTION = 'https://www.paynow.co.zw/interface/remotetransaction';
