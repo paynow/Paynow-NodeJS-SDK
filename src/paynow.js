@@ -1,11 +1,11 @@
 const http = require('request-promise-native');
-// TODO: Verify hashes at all interactions with server
+
 class StatusResponse {
 
     /**
-     * Boolean indicating whether the transaction was paid or not
+     * Merchant Transaction Reference
      */
-    paid: boolean;
+    reference: String;
 
     /**
      * The original amount of the transaction
@@ -13,11 +13,21 @@ class StatusResponse {
     amount: String;
 
     /**
-     * The original reference of the transaction
+     * Paynow transaction reference
      */
-    reference: String;
+    paynowreference: String;
 
+    /**
+     * The URL on Paynow the merchant site can poll to confirm the transaction’s current status. 
+     */
+    pollurl: String;
 
+    /**
+     * Status returned from Paynow
+     */
+    status: String;
+
+    error: String;
 
     /**
      * Default constructor
@@ -25,9 +35,17 @@ class StatusResponse {
      * @param data
      */
     constructor(data) {
-        this.paid = data.status.toLowerCase() === RESPONSE_PAID;
-        this.amount = data.amount;
-        this.reference = data.reference;
+
+        if(data.status.toLowerCase() === RESPONSE_ERROR){
+            this.error = data.error;
+        }else{
+            this.reference = data.reference;
+            this.amount = data.amount;
+            this.paynowreference = data.paynowreference;
+            this.pollurl = data.pollurl;
+            this.status = data.status;
+        }
+        
     }
 }
 
@@ -58,6 +76,16 @@ class InitResponse {
      */
     pollUrl: String;
 
+    /**
+     * The instructions for USSD push for customers to dial incase of mobile money payments
+     */
+    instructions: String;
+
+    /**
+     * The status from paynow
+     * @type {String}
+     */
+    status: String
 
     /**
      * Default constructor
@@ -65,16 +93,21 @@ class InitResponse {
      * @param data
      */
     constructor(data) {
-        this.success = data.status.toLowerCase() !== 'error';
+        this.status = data.status.toLowerCase()
+        this.success = this.status === RESPONSE_OK;
         this.hasRedirect = typeof data.browserurl !== "undefined";
 
         if (!this.success) {
             this.error = data.error;
-        }
-
-        if (this.hasRedirect) {
-            this.redirectUrl = data.browserurl;
-            this.pollUrl = data.pollurl;
+        }else{
+            if (this.hasRedirect) {
+                this.redirectUrl = data.browserurl;
+                this.pollUrl = data.pollurl;
+            }
+            
+            if(typeof data.instructions !== "undefined"){
+                this.instructions = data.instructions;
+            }
         }
     }
 
@@ -92,11 +125,18 @@ class Payment {
     items: [];
 
     /**
+     * Email address from client
+     */
+    authemail: String;
+
+
+    /**
      * Payment constructor
      * @param reference
      */
-    constructor(reference) {
+    constructor(reference, authEmail) {
         this.reference = reference;
+        this.authEmail = authEmail;
 
         this.items = [];
     }
@@ -122,10 +162,12 @@ class Payment {
 
     info() {
         let str = "";
+        let infoArr = [];
         this.items.forEach(function (value) {
-            str += value.title + ", "; // TODO: Update! This could be better
+            infoArr.push(value.title);
         });
 
+        str = infoArr.join(",");
         return str;
     }
 
@@ -135,7 +177,7 @@ class Payment {
      */
     total() {
         return this.items.reduce(function (accumulator, value) {
-            return accumulator + value.amount;
+            return accumulator + Number(value.amount);
         }, 0);
     }
 
@@ -183,7 +225,7 @@ module.exports = class Paynow {
      * @param payment 
      */
     send(payment) {
-        if(typeof payment !== Object) {
+        if(typeof payment !== 'object') {
             return false;
         }
 
@@ -199,12 +241,32 @@ module.exports = class Paynow {
     }
 
     /**
+     * Send a mobile money payment to paynow
+     * @param payment 
+     */
+    sendMobile(payment, phone: String, method: String) {
+        if(typeof payment !== 'object') {
+            return false;
+        }
+
+        if(!(payment instanceof Payment) && phone && method) {
+            if('reference' in payment && 'description' in payment && 'amount' in payment && 'authemail' in payment) {
+                payment = new Payment(payment['reference'], payment['authEmail']).add(payment['reference'], payment['amount'])
+            } else {
+                this.fail('Invalid object passed to function. Object must have the following keys: reference, description, amount, authemail');
+            }
+        }
+
+        return this.initMobile(payment, phone, method);
+    }
+
+    /**
      * Create a new Paynow payment
      * @param reference
      * @returns {Payment}
      */
-    createPayment(reference: string) {
-        return new Payment(reference);
+    createPayment(reference: string, authEmail: string) {
+        return new Payment(reference, authEmail);
     }
 
     /**
@@ -232,7 +294,27 @@ module.exports = class Paynow {
             form: data,
             json: false
         }, false)
+            .then((response) => {
+                return this.parse(response)
+        })
+    }
 
+    /**
+     * Initialize a new mobile transaction with PayNow
+     * @param payment
+     * @returns {PromiseLike<InitResponse> | Promise<InitResponse>}
+     */
+    initMobile(payment: Payment, phone: String, method: String) {
+        this.validate(payment);
+
+        let data = this.buildMobile(payment, phone, method);
+
+        return http({
+            method: 'POST',
+            uri: URL_INITIATE_MOBILE_TRANSACTION,
+            form: data,
+            json: false
+        }, false)
             .then((response) => {
                 return this.parse(response)
             })
@@ -244,9 +326,11 @@ module.exports = class Paynow {
      * @returns {InitResponse}
      */
     parse(response) {
+        if(typeof response === 'undefined') {
+            return null
+        }
         if (response.length > 0) {
             response = this.parseQuery(response);
-
             return new InitResponse(response);
         } else {
             throw new Error("An unknown error occurred")
@@ -262,15 +346,31 @@ module.exports = class Paynow {
     generateHash(values: Object, integrationKey: String) {
         let sha512 = require('js-sha512').sha512;
         let string = "";
-
+        
         for (const key of Object.keys(values)) {
-            string += (values[key]);
+            if(key !== "hash"){
+                string += (values[key]);
+            }
         }
 
-        string += integrationKey;
+        string += integrationKey.toLowerCase();
 
         return sha512(string).toUpperCase();
     }
+
+    /**
+     * Verify hashes at all interactions with server
+     * @param {*} values 
+     */
+    verifyHash(values: Object){
+       if(typeof values.hash === "undefined"){
+           return false;
+       }else{
+            return values.hash === this.generateHash(values, this.integrationKey);
+       }
+       
+    }
+
 
     /**
      * URL encodes the given string
@@ -278,13 +378,7 @@ module.exports = class Paynow {
      * @returns {String}
      */
     urlEncode(str) {
-        return encodeURIComponent(str)
-            .replace(/!/g, '%21')
-            .replace(/'/g, '%27')
-            .replace(/\(/g, '%28')
-            .replace(/\)/g, '%29')
-            .replace(/\*/g, '%2A')
-            .replace(/%20/g, '+')
+        return encodeURI(str);
     }
 
     /**
@@ -312,6 +406,9 @@ module.exports = class Paynow {
             let pair = pairs[i].split('=');
             query[this.urlDecode(pair[0])] = this.urlDecode(pair[1] || '');
         }
+
+        // if(!this.verifyHash(query))
+        //         throw new Error("Hash mismatch");
         return query;
     }
 
@@ -328,7 +425,35 @@ module.exports = class Paynow {
             'amount': payment.total(),
             'id': this.integrationId,
             'additionalinfo': payment.info(),
-            'authemail': '',
+            'authemail': typeof payment.authEmail === "undefined" ? '' : payment.authEmail,
+            'status': 'Message'
+        };
+
+        for (const key of Object.keys(data)) {
+            data[key] = this.urlEncode(data[key]);
+        }
+
+        data.hash = this.generateHash(data, this.integrationKey);
+
+        return data;
+    }
+
+    /**
+     * Build up a mobile payment into the format required by Paynow
+     * @param payment
+     * @returns {{resulturl: String, returnurl: String, reference: String, amount: number, id: String, additionalinfo: String, authemail: String, status: String}}
+     */
+    buildMobile(payment: Payment, phone: String, method: String) {
+        let data = {
+            'resulturl': this.resultUrl,
+            'returnurl': this.returnUrl,
+            'reference': payment.reference,
+            'amount': payment.total(),
+            'id': this.integrationId,
+            'additionalinfo': payment.info(),
+            'authemail': payment.authEmail,
+            'phone': phone,
+            'method' : method,
             'status': 'Message'
         };
 
@@ -346,41 +471,24 @@ module.exports = class Paynow {
      * @param url
      * @returns {PromiseLike<InitResponse> | Promise<InitResponse>}
      */
-    checkTransactionStatus(url) {
+    pollTransaction(url) {
         return http({
             method: 'POST',
             uri: url,
             json: false
         }, false)
-
-            .then((response) => {
-                return this.parse(response)
-            })
-    }
-
-    /**
-     * Check the status of a transaction
-     * @param url
-     * @returns {PromiseLike<InitResponse> | Promise<InitResponse>}
-     */
-    processStatusUpdate(url) {
-        return http({
-            method: 'POST',
-            uri: url,
-            json: false
-        }, false)
-
-            .then((response) => {
-                return this.parse(response)
-            })
+        .then((response) => {
+            return this.parseStatusUpdate(response)
+        })
     }
 
     /**
      * Parses the response from Paynow
      * @param response
-     * @returns {InitResponse}
+     * @returns {StatusResponse}
      */
     parseStatusUpdate(response) {
+
         if (response.length > 0) {
             response = this.parseQuery(response);
 
@@ -389,7 +497,6 @@ module.exports = class Paynow {
             throw new Error("An unknown error occurred")
         }
     }
-
 
     /**
      * Validates an outgoing request before sending it to Paynow (data sanity checks)
