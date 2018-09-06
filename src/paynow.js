@@ -496,6 +496,10 @@ module.exports = class Paynow {
 
         if (response.length > 0) {
             response = this.parseQuery(response);
+            
+            if(!this.verifyHash(response)) {
+                throw new Error("Hashes do not match!");
+            }
 
             return new StatusResponse(response);
         } else {
