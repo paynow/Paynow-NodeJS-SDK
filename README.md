@@ -17,7 +17,7 @@ This library has a set of prerequisites that must be met for it to work
 Install the library using NPM or yarn
 
 ```sh
-$ npm install --save paynow
+$ npm install --save paynowzw/node-sdk
 ```
 
 <p align="center">
@@ -25,7 +25,7 @@ Or
 </p>
 
 ```sh
-$ yarn add paynow
+$ yarn add paynowzw/node-sdk
 ```
 
 ## Usage example
