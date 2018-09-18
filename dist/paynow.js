@@ -1,19 +1,26 @@
 'use strict';
 
 var RESPONSE_OK = 'ok';
+var RESPONSE_PAID = 'paid';
 var RESPONSE_ERROR = 'error';
+var RESPONSE_FAILED = 'failed';
+var RESPONSE_DELIVERED = 'delivered';
+var RESPONSE_CANCELLED = 'cancelled';
+var RESPONSE_INVALID_ID = 'invalid id.';
+var RESPONSE_AWAITING_REDIRECT = 'awaiting redirect';
+var RESPONSE_AWAITING_DELIVERY = 'awaiting delivery';
+var RESPONSE_CREATED_NOT_PAID = 'created but not paid';
 
 var URL_INITIATE_TRANSACTION = 'https://paynow.webdevworld.com/interface/initiatetransaction';
 var URL_INITIATE_MOBILE_TRANSACTION = 'https://paynow.webdevworld.com/interface/remotetransaction';
-"use strict";
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var http = require('request-promise-native');
+// TODO: Verify hashes at all interactions with server
 
 var StatusResponse =
 
@@ -25,39 +32,23 @@ var StatusResponse =
 
 
 /**
- * Status returned from Paynow
- */
-
-
-/**
- * Paynow transaction reference
- */
-
-
-/**
- * Merchant Transaction Reference
+ * The original amount of the transaction
  */
 function StatusResponse(data) {
     _classCallCheck(this, StatusResponse);
 
-    if (data.status.toLowerCase() === RESPONSE_ERROR) {
-        this.error = data.error;
-    } else {
-        this.reference = data.reference;
-        this.amount = data.amount;
-        this.paynowreference = data.paynowreference;
-        this.pollurl = data.pollurl;
-        this.status = data.status;
-    }
+    this.paid = data.status.toLowerCase() === RESPONSE_PAID;
+    this.amount = data.amount;
+    this.reference = data.reference;
 }
 
 /**
- * The URL on Paynow the merchant site can poll to confirm the transaction’s current status. 
+ * The original reference of the transaction
  */
 
 
 /**
- * The original amount of the transaction
+ * Boolean indicating whether the transaction was paid or not
  */
 ;
 
@@ -67,11 +58,6 @@ var InitResponse =
  * Default constructor
  *
  * @param data
- */
-
-
-/**
- * The instructions for USSD push for customers to dial incase of mobile money payments
  */
 
 
@@ -86,29 +72,18 @@ var InitResponse =
 function InitResponse(data) {
     _classCallCheck(this, InitResponse);
 
-    this.status = data.status.toLowerCase();
-    this.success = this.status === RESPONSE_OK;
+    this.success = data.status.toLowerCase() !== 'error';
     this.hasRedirect = typeof data.browserurl !== "undefined";
 
     if (!this.success) {
         this.error = data.error;
-    } else {
-        if (this.hasRedirect) {
-            this.redirectUrl = data.browserurl;
-            this.pollUrl = data.pollurl;
-        }
+    }
 
-        if (typeof data.instructions !== "undefined") {
-            this.instructions = data.instructions;
-        }
+    if (this.hasRedirect) {
+        this.redirectUrl = data.browserurl;
+        this.pollUrl = data.pollurl;
     }
 }
-
-/**
- * The status from paynow
- * @type {String}
- */
-
 
 /**
  * The poll URL sent from Paynow
@@ -132,15 +107,13 @@ var Payment = function () {
      * @param reference
      */
 
-
     /**
-     * Items being paid from by client
+     * Unique identifier for transaction
      */
-    function Payment(reference, authEmail) {
+    function Payment(reference) {
         _classCallCheck(this, Payment);
 
         this.reference = reference;
-        this.authEmail = authEmail;
 
         this.items = [];
     }
@@ -154,16 +127,12 @@ var Payment = function () {
 
 
     /**
-     * Email address from client
-     */
-
-    /**
-     * Unique identifier for transaction
+     * Items being paid from by client
      */
 
 
     _createClass(Payment, [{
-        key: "add",
+        key: 'add',
         value: function add(title, amount) {
             if (title.isNullOrEmpty() || amount <= 0) {
                 return false;
@@ -177,15 +146,13 @@ var Payment = function () {
             return this;
         }
     }, {
-        key: "info",
+        key: 'info',
         value: function info() {
             var str = "";
-            var infoArr = [];
             this.items.forEach(function (value) {
-                infoArr.push(value.title);
+                str += value.title + ", "; // TODO: Update! This could be better
             });
 
-            str = infoArr.join(",");
             return str;
         }
 
@@ -195,10 +162,10 @@ var Payment = function () {
          */
 
     }, {
-        key: "total",
+        key: 'total',
         value: function total() {
             return this.items.reduce(function (accumulator, value) {
-                return accumulator + Number(value.amount);
+                return accumulator + value.amount;
             }, 0);
         }
     }]);
@@ -236,7 +203,7 @@ module.exports = function () {
 
     /**
      * Send a payment to paynow
-     * @param payment 
+     * @param payment
      */
 
 
@@ -251,44 +218,9 @@ module.exports = function () {
 
 
     _createClass(Paynow, [{
-        key: "send",
+        key: 'send',
         value: function send(payment) {
-            if ((typeof payment === "undefined" ? "undefined" : _typeof(payment)) !== 'object') {
-                return false;
-            }
-
-            if (!(payment instanceof Payment)) {
-                if ('reference' in payment && 'description' in payment && 'amount' in payment) {
-                    payment = new Payment(payment['reference']).add(payment['reference'], payment['amount']);
-                } else {
-                    this.fail('Invalid object passed to function. Object must have the following keys: reference, description, amount');
-                }
-            }
-
             return this.init(payment);
-        }
-
-        /**
-         * Send a mobile money payment to paynow
-         * @param payment 
-         */
-
-    }, {
-        key: "sendMobile",
-        value: function sendMobile(payment, phone, method) {
-            if ((typeof payment === "undefined" ? "undefined" : _typeof(payment)) !== 'object') {
-                return false;
-            }
-
-            if (!(payment instanceof Payment) && phone && method) {
-                if ('reference' in payment && 'description' in payment && 'amount' in payment && 'authemail' in payment) {
-                    payment = new Payment(payment['reference'], payment['authEmail']).add(payment['reference'], payment['amount']);
-                } else {
-                    this.fail('Invalid object passed to function. Object must have the following keys: reference, description, amount, authemail');
-                }
-            }
-
-            return this.initMobile(payment, phone, method);
         }
 
         /**
@@ -298,9 +230,9 @@ module.exports = function () {
          */
 
     }, {
-        key: "createPayment",
-        value: function createPayment(reference, authEmail) {
-            return new Payment(reference, authEmail);
+        key: 'createPayment',
+        value: function createPayment(reference) {
+            return new Payment(reference);
         }
 
         /**
@@ -310,7 +242,7 @@ module.exports = function () {
          */
 
     }, {
-        key: "fail",
+        key: 'fail',
         value: function fail(message) {
             throw new Error(message);
         }
@@ -322,7 +254,7 @@ module.exports = function () {
          */
 
     }, {
-        key: "init",
+        key: 'init',
         value: function init(payment) {
             var _this = this;
 
@@ -341,44 +273,17 @@ module.exports = function () {
         }
 
         /**
-         * Initialize a new mobile transaction with PayNow
-         * @param payment
-         * @returns {PromiseLike<InitResponse> | Promise<InitResponse>}
-         */
-
-    }, {
-        key: "initMobile",
-        value: function initMobile(payment, phone, method) {
-            var _this2 = this;
-
-            this.validate(payment);
-
-            var data = this.buildMobile(payment, phone, method);
-
-            return http({
-                method: 'POST',
-                uri: URL_INITIATE_MOBILE_TRANSACTION,
-                form: data,
-                json: false
-            }, false).then(function (response) {
-                return _this2.parse(response);
-            });
-        }
-
-        /**
          * Parses the response from Paynow
          * @param response
          * @returns {InitResponse}
          */
 
     }, {
-        key: "parse",
+        key: 'parse',
         value: function parse(response) {
-            if (typeof response === 'undefined') {
-                return null;
-            }
             if (response.length > 0) {
                 response = this.parseQuery(response);
+
                 return new InitResponse(response);
             } else {
                 throw new Error("An unknown error occurred");
@@ -393,7 +298,7 @@ module.exports = function () {
          */
 
     }, {
-        key: "generateHash",
+        key: 'generateHash',
         value: function generateHash(values, integrationKey) {
             var sha512 = require('js-sha512').sha512;
             var string = "";
@@ -406,9 +311,7 @@ module.exports = function () {
                 for (var _iterator = Object.keys(values)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
                     var key = _step.value;
 
-                    if (key !== "hash") {
-                        string += values[key];
-                    }
+                    string += values[key];
                 }
             } catch (err) {
                 _didIteratorError = true;
@@ -425,24 +328,9 @@ module.exports = function () {
                 }
             }
 
-            string += integrationKey.toLowerCase();
+            string += integrationKey;
 
             return sha512(string).toUpperCase();
-        }
-
-        /**
-         * Verify hashes at all interactions with server
-         * @param {*} values 
-         */
-
-    }, {
-        key: "verifyHash",
-        value: function verifyHash(values) {
-            if (typeof values.hash === "undefined") {
-                return false;
-            } else {
-                return values.hash === this.generateHash(values, this.integrationKey);
-            }
         }
 
         /**
@@ -452,9 +340,9 @@ module.exports = function () {
          */
 
     }, {
-        key: "urlEncode",
+        key: 'urlEncode',
         value: function urlEncode(str) {
-            return encodeURI(str);
+            return encodeURIComponent(str).replace(/!/g, '%21').replace(/'/g, '%27').replace(/\(/g, '%28').replace(/\)/g, '%29').replace(/\*/g, '%2A').replace(/%20/g, '+');
         }
 
         /**
@@ -464,7 +352,7 @@ module.exports = function () {
          */
 
     }, {
-        key: "urlDecode",
+        key: 'urlDecode',
         value: function urlDecode(str) {
             return decodeURIComponent((str + '').replace(/%(?![\da-f]{2})/gi, function () {
                 return '%25';
@@ -477,7 +365,7 @@ module.exports = function () {
          */
 
     }, {
-        key: "parseQuery",
+        key: 'parseQuery',
         value: function parseQuery(queryString) {
             var query = {};
             var pairs = (queryString[0] === '?' ? queryString.substr(1) : queryString).split('&');
@@ -485,9 +373,6 @@ module.exports = function () {
                 var pair = pairs[i].split('=');
                 query[this.urlDecode(pair[0])] = this.urlDecode(pair[1] || '');
             }
-
-            // if(!this.verifyHash(query))
-            //         throw new Error("Hash mismatch");
             return query;
         }
 
@@ -498,7 +383,7 @@ module.exports = function () {
          */
 
     }, {
-        key: "build",
+        key: 'build',
         value: function build(payment) {
             var data = {
                 'resulturl': this.resultUrl,
@@ -507,7 +392,7 @@ module.exports = function () {
                 'amount': payment.total(),
                 'id': this.integrationId,
                 'additionalinfo': payment.info(),
-                'authemail': typeof payment.authEmail === "undefined" ? '' : payment.authEmail,
+                'authemail': '',
                 'status': 'Message'
             };
 
@@ -537,58 +422,6 @@ module.exports = function () {
             }
 
             data.hash = this.generateHash(data, this.integrationKey);
-
-            return data;
-        }
-
-        /**
-         * Build up a mobile payment into the format required by Paynow
-         * @param payment
-         * @returns {{resulturl: String, returnurl: String, reference: String, amount: number, id: String, additionalinfo: String, authemail: String, status: String}}
-         */
-
-    }, {
-        key: "buildMobile",
-        value: function buildMobile(payment, phone, method) {
-            var data = {
-                'resulturl': this.resultUrl,
-                'returnurl': this.returnUrl,
-                'reference': payment.reference,
-                'amount': payment.total(),
-                'id': this.integrationId,
-                'additionalinfo': payment.info(),
-                'authemail': payment.authEmail,
-                'phone': phone,
-                'method': method,
-                'status': 'Message'
-            };
-
-            var _iteratorNormalCompletion3 = true;
-            var _didIteratorError3 = false;
-            var _iteratorError3 = undefined;
-
-            try {
-                for (var _iterator3 = Object.keys(data)[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-                    var key = _step3.value;
-
-                    data[key] = this.urlEncode(data[key]);
-                }
-            } catch (err) {
-                _didIteratorError3 = true;
-                _iteratorError3 = err;
-            } finally {
-                try {
-                    if (!_iteratorNormalCompletion3 && _iterator3.return) {
-                        _iterator3.return();
-                    }
-                } finally {
-                    if (_didIteratorError3) {
-                        throw _iteratorError3;
-                    }
-                }
-            }
-
-            data.hash = this.generateHash(data, this.integrationKey);
             return data;
         }
 
@@ -599,8 +432,28 @@ module.exports = function () {
          */
 
     }, {
-        key: "pollTransaction",
-        value: function pollTransaction(url) {
+        key: 'checkTransactionStatus',
+        value: function checkTransactionStatus(url) {
+            var _this2 = this;
+
+            return http({
+                method: 'POST',
+                uri: url,
+                json: false
+            }, false).then(function (response) {
+                return _this2.parse(response);
+            });
+        }
+
+        /**
+         * Check the status of a transaction
+         * @param url
+         * @returns {PromiseLike<InitResponse> | Promise<InitResponse>}
+         */
+
+    }, {
+        key: 'processStatusUpdate',
+        value: function processStatusUpdate(url) {
             var _this3 = this;
 
             return http({
@@ -608,20 +461,19 @@ module.exports = function () {
                 uri: url,
                 json: false
             }, false).then(function (response) {
-                return _this3.parseStatusUpdate(response);
+                return _this3.parse(response);
             });
         }
 
         /**
          * Parses the response from Paynow
          * @param response
-         * @returns {StatusResponse}
+         * @returns {InitResponse}
          */
 
     }, {
-        key: "parseStatusUpdate",
+        key: 'parseStatusUpdate',
         value: function parseStatusUpdate(response) {
-
             if (response.length > 0) {
                 response = this.parseQuery(response);
 
@@ -637,7 +489,7 @@ module.exports = function () {
          */
 
     }, {
-        key: "validate",
+        key: 'validate',
         value: function validate(payment) {
             if (payment.reference.isNullOrEmpty()) {
                 this.fail("Reference is required");
@@ -661,4 +513,4 @@ String.prototype.isNullOrEmpty = function (e) {
     return !(this == null ? e : this);
 };
 
-//# sourceMappingURL=index.js.map
+//# sourceMappingURL=paynow.js.map
