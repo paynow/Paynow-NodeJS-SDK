@@ -1,6 +1,5 @@
 # Node.JS SDK for Paynow Zimbabwe's API
 
-
 ## Sign in to Paynow and get integration details
 
 > Before you can start making requests to Paynow's API, you need to get an integration ID and integration Key from Paynow. Details about how you can retrieve the ID and key are explained in detail on [this page](generation.md)
@@ -17,7 +16,7 @@ This library has a set of prerequisites that must be met for it to work
 Install the library using NPM or yarn
 
 ```sh
-$ npm install --save paynowzw/node-sdk
+$ npm install --save paynow
 ```
 
 <p align="center">
@@ -25,7 +24,7 @@ Or
 </p>
 
 ```sh
-$ yarn add paynowzw/node-sdk
+$ yarn add paynow
 ```
 
 ## Usage example

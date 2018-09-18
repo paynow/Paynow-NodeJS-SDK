@@ -1,10 +1,10 @@
-'use strict';
+"use strict";
 
-var RESPONSE_OK = 'ok';
-var RESPONSE_ERROR = 'error';
+var RESPONSE_OK = "ok";
+var RESPONSE_ERROR = "error";
 
-var URL_INITIATE_TRANSACTION = 'https://paynow.webdevworld.com/interface/initiatetransaction';
-var URL_INITIATE_MOBILE_TRANSACTION = 'https://paynow.webdevworld.com/interface/remotetransaction';
+var URL_INITIATE_TRANSACTION = "https://www.paynow.co.zw/interface/initiatetransaction";
+var URL_INITIATE_MOBILE_TRANSACTION = "https://paynow.co.zw/interface/remotetransaction";
 "use strict";
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -379,6 +379,11 @@ module.exports = function () {
             }
             if (response.length > 0) {
                 response = this.parseQuery(response);
+
+                if (!this.verifyHash(response)) {
+                    throw new Error("Hashes do not match!");
+                }
+
                 return new InitResponse(response);
             } else {
                 throw new Error("An unknown error occurred");
@@ -624,6 +629,10 @@ module.exports = function () {
 
             if (response.length > 0) {
                 response = this.parseQuery(response);
+
+                if (!this.verifyHash(response)) {
+                    throw new Error("Hashes do not match!");
+                }
 
                 return new StatusResponse(response);
             } else {
