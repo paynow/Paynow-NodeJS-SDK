@@ -1,5 +1,5 @@
 {
-  "name": "paynow",
+  "name": "node-sdk",
   "version": "1.0.0",
   "description": "Paynow NodeJS SDK",
   "main": "dist/index.js",
@@ -9,6 +9,9 @@
   },
   "license": "MIT",
   "dependencies": {
+    "esdoc": "^1.1.0",
+    "esdoc-flow-type-plugin": "^1.1.0",
+    "esdoc-publish-markdown-plugin": "^1.1.0",
     "js-sha512": "^0.7.1",
     "request": "^2.87.0",
     "request-promise-native": "^1.0.5"
