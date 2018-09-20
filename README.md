@@ -171,7 +171,7 @@ paynow.send(payment).then( (response) => {
     // Check if request was successful
     if(response.success) {
         // Get the link to redirect the user to, then use it as you see fit
-        let link = response->redirectUrl;
+        let link = response.redirectUrl;
 
         // Save poll url, maybe (recommended)?
         let pollUrl = response.pollUrl;
