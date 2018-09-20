@@ -104,7 +104,7 @@ paynow.sendMobile(
     // The phone number making payment
     '0777000000',
     
-    // The mobile money method to use. Don't say you heard it from me
+    // The mobile money method to use.
     'ecocash' 
 
 ).then(function(response) {
