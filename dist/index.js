@@ -379,7 +379,9 @@ module.exports = function () {
       if (response.length > 0) {
         response = this.parseQuery(response);
 
-        if (!this.verifyHash(response)) {
+        console.log();
+
+        if (response.status.toLowerCase() !== "error" && !this.verifyHash(response)) {
           throw new Error("Hashes do not match!");
         }
 

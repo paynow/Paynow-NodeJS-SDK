@@ -286,7 +286,7 @@ module.exports = class Paynow {
    * @param message*
    * @returns void
    */
-  fail(message: String) {
+  fail(message) {
     throw new Error(message);
   }
 
@@ -348,7 +348,10 @@ module.exports = class Paynow {
     if (response.length > 0) {
       response = this.parseQuery(response);
 
-      if (!this.verifyHash(response)) {
+      if (
+        response.status.toLowerCase() !== "error" &&
+        !this.verifyHash(response)
+      ) {
         throw new Error("Hashes do not match!");
       }
 
