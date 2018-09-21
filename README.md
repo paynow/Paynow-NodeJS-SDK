@@ -88,7 +88,7 @@ instead of the `send` method.
 The `sendMobile` method unlike the `send` method takes in two additional arguments i.e The phone number to send the payment request to and the mobile money method to use for the request. **Note that currently only ecocash is supported**
 
 ```javascript
-paynow.send(payment).then(response => {
+paynow.sendMobile(payment, '0777000000', 'ecocash').then(response => {
   // Handle response
 });
 ```
@@ -96,18 +96,36 @@ paynow.send(payment).then(response => {
 The response object is almost identical to the one you get if you send a normal request. With a few differences, firstly, you don't get a url to redirect to. Instead you instructions (which ideally should be shown to the user instructing them how to make payment on their mobile phone)
 
 ```javascript
-paynow.send(payment).then(response => {
-  // Check if request was successful
-  if (response.success) {
-    // Get the poll url (used to check the status of a transaction). You might want to save this in your DB
-    let pollUrl = response.pollUrl;
+paynow.sendMobile(
+    
+    // The payment to send to Paynow
+    payment, 
 
-    // Get the instructions
-    let instructions = response.instructions;
-  } else {
+    // The phone number making payment
+    '0777000000',
+    
+    // The mobile money method to use.
+    'ecocash' 
+
+).then(function(response) {
+    if(response.success) {
+        // These are the instructions to show the user. 
+        // Instruction for how the user can make payment
+        let instructions = response.instructions // Get Payment instructions for the selected mobile money method
+
+        // Get poll url for the transaction. This is the url used to check the status of the transaction. 
+        // You might want to save this, we recommend you do it
+        let pollUrl = response.pollUrl; 
+
+        console.log(instructions)
+
+    } else {
+        console.log(response.error)
+    }
+}).catch(ex => {
     // Ahhhhhhhhhhhhhhh
     // *freak out*
-  }
+    console.log('Your application has broken an axle', ex)
 });
 ```
 
@@ -153,7 +171,7 @@ paynow.send(payment).then( (response) => {
     // Check if request was successful
     if(response.success) {
         // Get the link to redirect the user to, then use it as you see fit
-        let link = response->redirectUrl;
+        let link = response.redirectUrl;
 
         // Save poll url, maybe (recommended)?
         let pollUrl = response.pollUrl;
