@@ -122,7 +122,7 @@ class Payment {
   /**
    * Email address from client
    */
-  authemail: String;
+  authEmail: String;
 
   /**
    * Payment constructor
@@ -130,7 +130,7 @@ class Payment {
    */
   constructor(reference, authEmail) {
     this.reference = reference;
-    this.authEmail = authEmail;
+    this.authEmail = authEmail ? authEmail : "";
 
     this.items = [];
   }
@@ -142,7 +142,7 @@ class Payment {
    * @returns {*} Returns false if parameters fail validation
    */
   add(title: String, amount: Number) {
-    if (title.isNullOrEmpty() || amount <= 0) {
+    if (!title || title.isNullOrEmpty() || amount <= 0) {
       return false;
     }
 
@@ -473,7 +473,11 @@ module.exports = class Paynow {
    * @returns {{resulturl: String, returnurl: String, reference: String, amount: number, id: String, additionalinfo: String, authemail: String, status: String}}
    */
   buildMobile(payment: Payment, phone: String, method: String) {
-    if (payment.authEmail.isNullOrEmpty() || payment.authEmail.length <= 0) {
+    if (
+      !payment.authEmail ||
+      payment.authEmail.isNullOrEmpty() ||
+      payment.authEmail.length <= 0
+    ) {
       throw new Error(
         "Auth email is required for mobile transactions. You can pass it as the second parameter to the createPayment method call"
       );
@@ -545,7 +549,7 @@ module.exports = class Paynow {
    * @param payment
    */
   validate(payment: Payment) {
-    if (payment.reference.isNullOrEmpty()) {
+    if (!payment.reference || payment.reference.isNullOrEmpty()) {
       this.fail("Reference is required");
     }
 

@@ -138,7 +138,7 @@ var Payment = function () {
     _classCallCheck(this, Payment);
 
     this.reference = reference;
-    this.authEmail = authEmail;
+    this.authEmail = authEmail ? authEmail : "";
 
     this.items = [];
   }
@@ -163,7 +163,7 @@ var Payment = function () {
   _createClass(Payment, [{
     key: "add",
     value: function add(title, amount) {
-      if (title.isNullOrEmpty() || amount <= 0) {
+      if (!title || title.isNullOrEmpty() || amount <= 0) {
         return false;
       }
 
@@ -379,8 +379,6 @@ module.exports = function () {
       if (response.length > 0) {
         response = this.parseQuery(response);
 
-        console.log();
-
         if (response.status.toLowerCase() !== "error" && !this.verifyHash(response)) {
           throw new Error("Hashes do not match!");
         }
@@ -558,7 +556,7 @@ module.exports = function () {
   }, {
     key: "buildMobile",
     value: function buildMobile(payment, phone, method) {
-      if (payment.authEmail.isNullOrEmpty() || payment.authEmail.length <= 0) {
+      if (!payment.authEmail || payment.authEmail.isNullOrEmpty() || payment.authEmail.length <= 0) {
         throw new Error("Auth email is required for mobile transactions. You can pass it as the second parameter to the createPayment method call");
       }
 
@@ -657,7 +655,7 @@ module.exports = function () {
   }, {
     key: "validate",
     value: function validate(payment) {
-      if (payment.reference.isNullOrEmpty()) {
+      if (!payment.reference || payment.reference.isNullOrEmpty()) {
         this.fail("Reference is required");
       }
 
