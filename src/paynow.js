@@ -210,6 +210,7 @@ module.exports = class Paynow {
     this.integrationKey = integrationKey;
     this.resultUrl = resultUrl;
     this.returnUrl = returnUrl;
+    if(!this.integrationId || !this.integrationKey) throw new Error("Missing or Invalid Credentials. Please check your Integration ID & Key.");
   }
 
   /**

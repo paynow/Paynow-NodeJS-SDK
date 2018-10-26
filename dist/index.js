@@ -235,8 +235,7 @@ module.exports = function () {
     this.integrationKey = integrationKey;
     this.resultUrl = resultUrl;
     this.returnUrl = returnUrl;
-
-    if (!this.integrationId || !this.integrationKey) throw new Error("Missing Credentials. Please check your Integration ID & Key.");
+    if (!this.integrationId || !this.integrationKey) throw new Error("Missing or Invalid Credentials. Please check your Integration ID & Key.");
   }
 
   /**
