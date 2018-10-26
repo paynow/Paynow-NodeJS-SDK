@@ -205,7 +205,7 @@ module.exports = class Paynow {
    * @param resultUrl {String} Url where where transaction status will be sent
    * @param returnUrl {String} Url to redirect the user after payment
    */
-  constructor(integrationId, integrationKey, resultUrl, returnUrl) {
+  constructor(integrationId = process.env.PAYNOW_INTEGRATION_ID, integrationKey = process.env.PAYNOW_INTEGRATION_KEY, resultUrl, returnUrl) {
     this.integrationId = integrationId;
     this.integrationKey = integrationKey;
     this.resultUrl = resultUrl;
