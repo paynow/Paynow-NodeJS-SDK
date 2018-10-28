@@ -1,39 +1,27 @@
 const http = require("request-promise-native");
+//#region StatusResponse Class
+/**
+ * 
+ * @property {String} reference - merchant transaction reference .
+ * @property {String} amount - original amount for the transaction.
+ * @property {String} paynowreference  - the Paynow transaction reference.
+ * @property {String} pollurl - the URL on Paynow the merchant can poll to confirm the transaction’s status.
+ * @property {String} status - transaction status returned from paynow.
+ * @property {String} error - error message sent from Paynow  (if any).
+ *  
+ * @param data data from the status response
+ */
+
 
 class StatusResponse {
-  /**
-   * Merchant Transaction Reference
-   */
   reference: String;
-
-  /**
-   * The original amount of the transaction
-   */
   amount: String;
-
-  /**
-   * Paynow transaction reference
-   */
   paynowreference: String;
-
-  /**
-   * The URL on Paynow the merchant site can poll to confirm the transaction’s current status.
-   */
   pollurl: String;
-
-  /**
-   * Status returned from Paynow
-   */
   status: String;
-
   error: String;
 
-  /**
-   * Default constructor
-   *
-   * @param data
-   */
-  constructor(data) {
+  constructor(data : any ) {
     if (data.status.toLowerCase() === RESPONSE_ERROR) {
       this.error = data.error;
     } else {
@@ -45,50 +33,33 @@ class StatusResponse {
     }
   }
 }
+//#endregion
+
+//#region InitResponse Class
+/**
+ * 
+ * @property {boolean} success - indicates if initiate request was successful or not.
+ * @property {boolean} hasRedirect - indicates if the response has a URL to redirect to.
+ * @property {String} redirectUrl - the URL the user should be redirected to so they can make a payment.
+ * @property {String} error - error message sent from Paynow (if any).
+ * @property {String} pollUrl  - pollUrl sent from Paynow that can be used to check transaction status.
+ * @property {String} instructions - instructions for USSD push for customers to dial incase of mobile money payments.
+ * @property {String} status - status from Paynow.
+ * 
+ * @param data - data from teh Response.   
+ * 
+ */
 
 class InitResponse {
-  /**
-   * Boolean indicating whether initiate request was successful or not
-   */
   success: boolean;
-
-  /**
-   * Boolean indicating whether the response contains a url to redirect to
-   */
   hasRedirect: boolean;
-
-  /**
-   * The url the user should be taken to so they can make a payment
-   */
   redirectUrl: String;
-
-  /**
-   * The error message from Paynow, if any
-   */
   error: String;
-
-  /**
-   * The poll URL sent from Paynow
-   */
   pollUrl: String;
-
-  /**
-   * The instructions for USSD push for customers to dial incase of mobile money payments
-   */
   instructions: String;
-
-  /**
-   * The status from paynow
-   * @type {String}
-   */
   status: String;
 
-  /**
-   * Default constructor
-   *
-   * @param data
-   */
-  constructor(data) {
+  constructor(data: any) {
     this.status = data.status.toLowerCase();
     this.success = this.status === RESPONSE_OK;
     this.hasRedirect = typeof data.browserurl !== "undefined";
@@ -107,62 +78,46 @@ class InitResponse {
     }
   }
 }
+//#endregion
+
+//#region CartItem Class
+class CartItem {
+  constructor( public title: string, public amount: string ){}
+}
+
+//#endregion
+
+//#region  Payment  Class
+/**
+ *  
+ * @param reference  unique identifier for the transaction.
+ * @param authEmail customer's email address.
+ * @param items items inthe user's Cart 
+ * 
+ */
 
 class Payment {
-  /**
-   * Unique identifier for transaction
-   */
-  reference: string;
-
-  /**
-   * Items being paid from by client
-   */
-  items: [];
-
-  /**
-   * Email address from client
-   */
-  authEmail: String;
-
-  /**
-   * Payment constructor
-   * @param reference
-   */
-  constructor(reference, authEmail) {
-    this.reference = reference;
-    this.authEmail = authEmail ? authEmail : "";
-
-    this.items = [];
-  }
-
+  constructor(public reference: string, public authEmail: string, public items?: CartItem[]) {}
   /**
    * Adds an item to the 'shopping cart'
    * @param title
    * @param amount
-   * @returns {*} Returns false if parameters fail validation
    */
-  add(title: String, amount: Number) {
-    if (!title || title.isNullOrEmpty() || amount <= 0) {
-      return false;
-    }
 
-    this.items.push({
-      title,
-      amount
-    });
-
+  add(title: string, amount: string): Payment {
+    this.items.push( new CartItem(title, amount));
     return this;
   }
 
-  info() {
-    let str = "";
-    let infoArr = [];
-    this.items.forEach(function(value) {
-      infoArr.push(value.title);
+  info(): string {
+    let stringOfItemsInCart : string;
+    let infoArr: string[] = [];
+    this.items.forEach(  itemInCart=> {
+      infoArr.push(itemInCart.title);
     });
 
-    str = infoArr.join(",");
-    return str;
+    stringOfItemsInCart = infoArr.join(",");
+    return stringOfItemsInCart;
   }
 
   /**
@@ -176,68 +131,23 @@ class Payment {
   }
 }
 
-module.exports = class Paynow {
-  /**
-   * Merchant's integration id
-   */
-  integrationId: String;
+//#endregion
 
-  /**
-   * Merchant's integration key
-   */
-  integrationKey: String;
+/**
 
-  /**
-   * Url where where transaction status will be sent
-   */
-  resultUrl: String;
+ * @param integrationId {String} Merchant's integration id
+ * @param integrationKey {String} Merchant's integration key
+ * @param resultUrl {String} Url where where transaction status will be sent
+ * @param returnUrl {String} Url to redirect the user after payment
+ **/
 
-  /**
-   * Url to redirect the user after payment
-   */
-  returnUrl: String;
-
-  /**
-   * Default constructor
-   *
-   * @param integrationId {String} Merchant's integration id
-   * @param integrationKey {String} Merchant's integration key
-   * @param resultUrl {String} Url where where transaction status will be sent
-   * @param returnUrl {String} Url to redirect the user after payment
-   */
-  constructor(integrationId, integrationKey, resultUrl, returnUrl) {
-    this.integrationId = integrationId;
-    this.integrationKey = integrationKey;
-    this.resultUrl = resultUrl;
-    this.returnUrl = returnUrl;
-  }
-
+class Paynow {
+  constructor(public integrationId: string, public integrationKey: string, public resultUrl:string, public returnUrl: string) {}
   /**
    * Send a payment to paynow
    * @param payment
    */
-  send(payment) {
-    if (typeof payment !== "object") {
-      return false;
-    }
-
-    if (!(payment instanceof Payment)) {
-      if (
-        "reference" in payment &&
-        "description" in payment &&
-        "amount" in payment
-      ) {
-        payment = new Payment(payment["reference"]).add(
-          payment["reference"],
-          payment["amount"]
-        );
-      } else {
-        this.fail(
-          "Invalid object passed to function. Object must have the following keys: reference, description, amount"
-        );
-      }
-    }
-
+  send(payment: Payment) {
     return this.init(payment);
   }
 
@@ -245,29 +155,7 @@ module.exports = class Paynow {
    * Send a mobile money payment to paynow
    * @param payment
    */
-  sendMobile(payment, phone: String, method: String) {
-    if (typeof payment !== "object") {
-      return false;
-    }
-
-    if (!(payment instanceof Payment) && phone && method) {
-      if (
-        "reference" in payment &&
-        "description" in payment &&
-        "amount" in payment &&
-        "authemail" in payment
-      ) {
-        payment = new Payment(payment["reference"], payment["authEmail"]).add(
-          payment["reference"],
-          payment["amount"]
-        );
-      } else {
-        this.fail(
-          "Invalid object passed to function. Object must have the following keys: reference, description, amount, authemail"
-        );
-      }
-    }
-
+  sendMobile(payment: Payment, phone: string, method: string) {
     return this.initMobile(payment, phone, method);
   }
 
@@ -277,7 +165,7 @@ module.exports = class Paynow {
    * @param {String} authEmail This is the email address of the person making payment. Required for mobile transactions
    * @returns {Payment}
    */
-  createPayment(reference: string, authEmail: string) {
+  createPayment(reference: string, authEmail: string): Payment {
     return new Payment(reference, authEmail);
   }
 
@@ -286,7 +174,7 @@ module.exports = class Paynow {
    * @param message*
    * @returns void
    */
-  fail(message) {
+  fail(message: string) {
     throw new Error(message);
   }
 
@@ -297,18 +185,14 @@ module.exports = class Paynow {
    */
   init(payment: Payment) {
     this.validate(payment);
-
     let data = this.build(payment);
-
-    return http(
-      {
+    return http({
         method: "POST",
         uri: URL_INITIATE_TRANSACTION,
         form: data,
         json: false
-      },
-      false
-    ).then(response => {
+      }, false
+    ).then( (response: any)  => {
       return this.parse(response);
     });
   }
@@ -318,7 +202,7 @@ module.exports = class Paynow {
    * @param payment
    * @returns {PromiseLike<InitResponse> | Promise<InitResponse>}
    */
-  initMobile(payment: Payment, phone: String, method: String) {
+  initMobile(payment: Payment, phone: string, method: string) {
     this.validate(payment);
 
     let data = this.buildMobile(payment, phone, method);
@@ -331,7 +215,7 @@ module.exports = class Paynow {
         json: false
       },
       false
-    ).then(response => {
+    ).then((response:any) => {
       return this.parse(response);
     });
   }
@@ -341,7 +225,7 @@ module.exports = class Paynow {
    * @param response
    * @returns {InitResponse}
    */
-  parse(response) {
+  parse(response:any) {
     if (typeof response === "undefined") {
       return null;
     }
@@ -367,9 +251,9 @@ module.exports = class Paynow {
    * @param integrationKey
    * @returns {string}
    */
-  generateHash(values: Object, integrationKey: String) {
+  generateHash(values: { [key : string]: string}, integrationKey: String) {
     let sha512 = require("js-sha512").sha512;
-    let string = "";
+    let string: string = "";
 
     for (const key of Object.keys(values)) {
       if (key !== "hash") {
@@ -386,11 +270,11 @@ module.exports = class Paynow {
    * Verify hashes at all interactions with server
    * @param {*} values
    */
-  verifyHash(values: Object) {
-    if (typeof values.hash === "undefined") {
+  verifyHash(values: {[key: string]: string}) {
+    if (typeof values["hash"] === "undefined") {
       return false;
     } else {
-      return values.hash === this.generateHash(values, this.integrationKey);
+      return values["hash"] === this.generateHash(values, this.integrationKey);
     }
   }
 
@@ -399,8 +283,8 @@ module.exports = class Paynow {
    * @param str {String}
    * @returns {String}
    */
-  urlEncode(str) {
-    return encodeURI(str);
+  urlEncode(url: string) {
+    return encodeURI(url);
   }
 
   /**
@@ -408,9 +292,9 @@ module.exports = class Paynow {
    * @param str {String}
    * @returns {String}
    */
-  urlDecode(str) {
+  urlDecode(url: string) {
     return decodeURIComponent(
-      (str + "")
+      (url + "")
         .replace(/%(?![\da-f]{2})/gi, function() {
           return "%25";
         })
@@ -422,15 +306,16 @@ module.exports = class Paynow {
    * Parse responses from Paynow
    * @param queryString
    */
-  parseQuery(queryString) {
-    let query = {};
+  parseQuery(queryString: string) {
+    let query: {[key: string]: string}= {};
     let pairs = (queryString[0] === "?"
       ? queryString.substr(1)
       : queryString
     ).split("&");
     for (let i = 0; i < pairs.length; i++) {
       let pair = pairs[i].split("=");
-      query[this.urlDecode(pair[0])] = this.urlDecode(pair[1] || "");
+      query[this.urlDecode(pair[0])] = this.urlDecode(pair[1] || ""
+      );
     }
 
     // if(!this.verifyHash(query))
@@ -444,11 +329,11 @@ module.exports = class Paynow {
    * @returns {{resulturl: String, returnurl: String, reference: String, amount: number, id: String, additionalinfo: String, authemail: String, status: String}}
    */
   build(payment: Payment) {
-    let data = {
+    let data: { [key: string] : string } = {
       resulturl: this.resultUrl,
       returnurl: this.returnUrl,
       reference: payment.reference,
-      amount: payment.total(),
+      amount: payment.total().toString(),
       id: this.integrationId,
       additionalinfo: payment.info(),
       authemail:
@@ -462,7 +347,7 @@ module.exports = class Paynow {
       data[key] = this.urlEncode(data[key]);
     }
 
-    data.hash = this.generateHash(data, this.integrationKey);
+    data["hash"] = this.generateHash(data, this.integrationKey);
 
     return data;
   }
@@ -472,22 +357,18 @@ module.exports = class Paynow {
    * @param payment
    * @returns {{resulturl: String, returnurl: String, reference: String, amount: number, id: String, additionalinfo: String, authemail: String, status: String}}
    */
-  buildMobile(payment: Payment, phone: String, method: String) {
-    if (
-      !payment.authEmail ||
-      payment.authEmail.isNullOrEmpty() ||
-      payment.authEmail.length <= 0
-    ) {
+  buildMobile(payment: Payment, phone: string, method: string) {
+    if (payment.authEmail.length <= 0) {
       throw new Error(
         "Auth email is required for mobile transactions. You can pass it as the second parameter to the createPayment method call"
       );
     }
 
-    let data = {
+    let data:  { [key: string] : string } = {
       resulturl: this.resultUrl,
       returnurl: this.returnUrl,
       reference: payment.reference,
-      amount: payment.total(),
+      amount: payment.total().toString(),
       id: this.integrationId,
       additionalinfo: payment.info(),
       authemail: payment.authEmail,
@@ -502,7 +383,7 @@ module.exports = class Paynow {
       data[key] = this.urlEncode(data[key]);
     }
 
-    data.hash = this.generateHash(data, this.integrationKey);
+    data["hash"] = this.generateHash(data, this.integrationKey);
 
     return data;
   }
@@ -512,7 +393,7 @@ module.exports = class Paynow {
    * @param url
    * @returns {PromiseLike<InitResponse> | Promise<InitResponse>}
    */
-  pollTransaction(url) {
+  pollTransaction(url: string) {
     return http(
       {
         method: "POST",
@@ -520,7 +401,7 @@ module.exports = class Paynow {
         json: false
       },
       false
-    ).then(response => {
+    ).then((response: any) => {
       return this.parseStatusUpdate(response);
     });
   }
@@ -530,7 +411,7 @@ module.exports = class Paynow {
    * @param response
    * @returns {StatusResponse}
    */
-  parseStatusUpdate(response) {
+  parseStatusUpdate(response: any) {
     if (response.length > 0) {
       response = this.parseQuery(response);
 
@@ -549,10 +430,6 @@ module.exports = class Paynow {
    * @param payment
    */
   validate(payment: Payment) {
-    if (!payment.reference || payment.reference.isNullOrEmpty()) {
-      this.fail("Reference is required");
-    }
-
     if (payment.items.length <= 0) {
       this.fail("You need to have at least one item in cart");
     }
@@ -562,3 +439,5 @@ module.exports = class Paynow {
     }
   }
 };
+
+module.exports = Paynow
