@@ -44,6 +44,11 @@ paynow.resultUrl = "http://example.com/gateways/paynow/update";
 paynow.returnUrl = "http://example.com/return?gateway=paynow";
 // The return url can be set at later stages. You might want to do this if you want to pass data to the return url (like the reference of the transaction)
 ```
+The Integration ID and Key can be optionally loaded from `PAYNOW_INTEGRATION_ID` and `PAYNOW_INTEGRATION_KEY` environment variables (respectively). An instance of the Paynow class can then be created using the following: 
+
+```javascript
+let paynow = new Paynow();
+```
 
 Create a new payment passing in the reference for that payment (e.g invoice id, or anything that you can use to identify the transaction.
 

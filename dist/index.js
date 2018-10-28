@@ -223,13 +223,19 @@ module.exports = function () {
   /**
    * Merchant's integration id
    */
-  function Paynow(integrationId, integrationKey, resultUrl, returnUrl) {
+  function Paynow() {
+    var integrationId = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : process.env.PAYNOW_INTEGRATION_ID;
+    var integrationKey = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : process.env.PAYNOW_INTEGRATION_KEY;
+    var resultUrl = arguments[2];
+    var returnUrl = arguments[3];
+
     _classCallCheck(this, Paynow);
 
     this.integrationId = integrationId;
     this.integrationKey = integrationKey;
     this.resultUrl = resultUrl;
     this.returnUrl = returnUrl;
+    if (!this.integrationId || !this.integrationKey) throw new Error("Missing or Invalid Credentials. Please check your Integration ID & Key.");
   }
 
   /**
