@@ -4,7 +4,7 @@
         "noImplicitAny": true,
         "removeComments": true,
         "preserveConstEnums": true,
-        "outFile": "dist./index.js",
+        "outFile": "dist/index.js",
         "sourceMap": true
     },
     "include": [
