@@ -240,7 +240,7 @@ class Paynow {
         throw new Error("Hashes do not match!");
       }
 
-      return new InitResponse(response);
+      return new InitResponse(parsedResponseURL);
     } else {
       throw new Error("An unknown error occurred");
     }
