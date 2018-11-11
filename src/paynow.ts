@@ -176,7 +176,7 @@ class Paynow {
    * @param message*
    * @returns void
    */
-  fail(message: string) {
+  fail(message: string) : Error {
     throw new Error(message);
   }
 
@@ -358,7 +358,7 @@ class Paynow {
    * @param payment
    * @returns {{resulturl: String, returnurl: String, reference: String, amount: number, id: String, additionalinfo: String, authemail: String, status: String}}
    */
-  buildMobile(payment: Payment, phone: string, method: string) {
+  buildMobile(payment: Payment, phone: string, method: string): Error |  {[key: string]: string }{
     if (payment.authEmail.length <= 0) {
       throw new Error(
         "Auth email is required for mobile transactions. You can pass it as the second parameter to the createPayment method call"
