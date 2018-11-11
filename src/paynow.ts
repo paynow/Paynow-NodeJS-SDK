@@ -194,15 +194,15 @@ class Paynow {
       form: data,
       json: false
     }, false
-    ).then((response: any) => {
+    ).then((response: Response) => {
       return this.parse(response);
     });
   }
 
   /**
    * Initialize a new mobile transaction with PayNow
-   * @param payment
-   * @returns {PromiseLike<InitResponse> | Promise<InitResponse>}
+   * @param {Payment} payment
+   * @returns {Response} the response from the initiation of the transaction
    */
   initMobile(payment: Payment, phone: string, method: string) {
     this.validate(payment);
@@ -217,7 +217,7 @@ class Paynow {
         json: false
       },
       false
-    ).then((response: any) => {
+    ).then((response: Response) => {
       return this.parse(response);
     });
   }
@@ -227,16 +227,15 @@ class Paynow {
    * @param response
    * @returns {InitResponse}
    */
-  parse(response: any) {
+  parse(response: Response) {
     if (typeof response === "undefined") {
       return null;
     }
-    if (response.length > 0) {
-      response = this.parseQuery(response);
+    if (response) {
+      let parsedResponseURL = this.parseQuery(response.url);
 
-      if (
-        response.status.toLowerCase() !== "error" &&
-        !this.verifyHash(response)
+      if (response.status.toString() !== "error" &&
+        !this.verifyHash(parsedResponseURL)
       ) {
         throw new Error("Hashes do not match!");
       }
