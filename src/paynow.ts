@@ -1,4 +1,6 @@
 const http = require("request-promise-native");
+
+
 //#region StatusResponse Class
 /**
  * 
@@ -21,7 +23,7 @@ class StatusResponse {
   status: String;
   error: String;
 
-  constructor(data : any ) {
+  constructor(data: any) {
     if (data.status.toLowerCase() === RESPONSE_ERROR) {
       this.error = data.error;
     } else {
@@ -82,7 +84,7 @@ class InitResponse {
 
 //#region CartItem Class
 class CartItem {
-  constructor( public title: string, public amount: string ){}
+  constructor(public title: string, public amount: string) { }
 }
 
 //#endregion
@@ -97,7 +99,7 @@ class CartItem {
  */
 
 class Payment {
-  constructor(public reference: string, public authEmail: string, public items?: CartItem[]) {}
+  constructor(public reference: string, public authEmail: string, public items?: CartItem[]) { }
   /**
    * Adds an item to the 'shopping cart'
    * @param title
@@ -105,14 +107,14 @@ class Payment {
    */
 
   add(title: string, amount: string): Payment {
-    this.items.push( new CartItem(title, amount));
+    this.items.push(new CartItem(title, amount));
     return this;
   }
 
   info(): string {
-    let stringOfItemsInCart : string;
+    let stringOfItemsInCart: string;
     let infoArr: string[] = [];
-    this.items.forEach(  itemInCart=> {
+    this.items.forEach(itemInCart => {
       infoArr.push(itemInCart.title);
     });
 
@@ -125,7 +127,7 @@ class Payment {
    * @returns {*|number}
    */
   total() {
-    return this.items.reduce(function(accumulator, value) {
+    return this.items.reduce(function (accumulator, value) {
       return accumulator + Number(value.amount);
     }, 0);
   }
@@ -142,7 +144,7 @@ class Payment {
  **/
 
 class Paynow {
-  constructor(public integrationId: string, public integrationKey: string, public resultUrl:string, public returnUrl: string) {}
+  constructor(public integrationId: string, public integrationKey: string, public resultUrl: string, public returnUrl: string) { }
   /**
    * Send a payment to paynow
    * @param payment
@@ -187,12 +189,12 @@ class Paynow {
     this.validate(payment);
     let data = this.build(payment);
     return http({
-        method: "POST",
-        uri: URL_INITIATE_TRANSACTION,
-        form: data,
-        json: false
-      }, false
-    ).then( (response: any)  => {
+      method: "POST",
+      uri: URL_INITIATE_TRANSACTION,
+      form: data,
+      json: false
+    }, false
+    ).then((response: any) => {
       return this.parse(response);
     });
   }
@@ -215,7 +217,7 @@ class Paynow {
         json: false
       },
       false
-    ).then((response:any) => {
+    ).then((response: any) => {
       return this.parse(response);
     });
   }
@@ -225,7 +227,7 @@ class Paynow {
    * @param response
    * @returns {InitResponse}
    */
-  parse(response:any) {
+  parse(response: any) {
     if (typeof response === "undefined") {
       return null;
     }
@@ -251,7 +253,7 @@ class Paynow {
    * @param integrationKey
    * @returns {string}
    */
-  generateHash(values: { [key : string]: string}, integrationKey: String) {
+  generateHash(values: { [key: string]: string }, integrationKey: String) {
     let sha512 = require("js-sha512").sha512;
     let string: string = "";
 
@@ -270,7 +272,7 @@ class Paynow {
    * Verify hashes at all interactions with server
    * @param {*} values
    */
-  verifyHash(values: {[key: string]: string}) {
+  verifyHash(values: { [key: string]: string }) {
     if (typeof values["hash"] === "undefined") {
       return false;
     } else {
@@ -295,7 +297,7 @@ class Paynow {
   urlDecode(url: string) {
     return decodeURIComponent(
       (url + "")
-        .replace(/%(?![\da-f]{2})/gi, function() {
+        .replace(/%(?![\da-f]{2})/gi, function () {
           return "%25";
         })
         .replace(/\+/g, "%20")
@@ -307,7 +309,7 @@ class Paynow {
    * @param queryString
    */
   parseQuery(queryString: string) {
-    let query: {[key: string]: string}= {};
+    let query: { [key: string]: string } = {};
     let pairs = (queryString[0] === "?"
       ? queryString.substr(1)
       : queryString
@@ -329,7 +331,7 @@ class Paynow {
    * @returns {{resulturl: String, returnurl: String, reference: String, amount: number, id: String, additionalinfo: String, authemail: String, status: String}}
    */
   build(payment: Payment) {
-    let data: { [key: string] : string } = {
+    let data: { [key: string]: string } = {
       resulturl: this.resultUrl,
       returnurl: this.returnUrl,
       reference: payment.reference,
@@ -364,7 +366,7 @@ class Paynow {
       );
     }
 
-    let data:  { [key: string] : string } = {
+    let data: { [key: string]: string } = {
       resulturl: this.resultUrl,
       returnurl: this.returnUrl,
       reference: payment.reference,
