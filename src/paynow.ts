@@ -145,6 +145,7 @@ class Payment {
 
 class Paynow {
   constructor(public integrationId: string, public integrationKey: string, public resultUrl: string, public returnUrl: string) { }
+
   /**
    * Send a payment to paynow
    * @param payment
@@ -202,7 +203,7 @@ class Paynow {
   /**
    * Initialize a new mobile transaction with PayNow
    * @param {Payment} payment
-   * @returns {Response} the response from the initiation of the transaction
+   * @returns {PromiseLike<InitResponse> | Promise<InitResponse>} the response from the initiation of the transaction
    */
   initMobile(payment: Payment, phone: string, method: string) {
     this.validate(payment);
