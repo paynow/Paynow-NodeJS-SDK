@@ -1,7 +1,7 @@
 # Node.JS SDK for Paynow Zimbabwe's API
 
 
-##Typescript Usage 
+## Typescript Usage 
 
 Fork this repository and compile typescript to start using it in your project. 
 
