@@ -143,26 +143,8 @@ class Payment {
  * @param returnUrl {String} Url to redirect the user after payment
  **/
 
-<<<<<<< HEAD:src/paynow.js
-  /**
-   * Default constructor
-   *
-   * @param integrationId {String} Merchant's integration id
-   * @param integrationKey {String} Merchant's integration key
-   * @param resultUrl {String} Url where where transaction status will be sent
-   * @param returnUrl {String} Url to redirect the user after payment
-   */
-  constructor(integrationId = process.env.PAYNOW_INTEGRATION_ID, integrationKey = process.env.PAYNOW_INTEGRATION_KEY, resultUrl, returnUrl) {
-    this.integrationId = integrationId;
-    this.integrationKey = integrationKey;
-    this.resultUrl = resultUrl;
-    this.returnUrl = returnUrl;
-    if(!this.integrationId || !this.integrationKey) throw new Error("Missing or Invalid Credentials. Please check your Integration ID & Key.");
-  }
-=======
 class Paynow {
   constructor(public integrationId: string, public integrationKey: string, public resultUrl: string, public returnUrl: string) { }
->>>>>>> d3e0cacf0d12485ff09579c4e3707e946b4b9677:src/paynow.ts
 
   /**
    * Send a payment to paynow
