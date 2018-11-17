@@ -1,5 +1,10 @@
 # Node.JS SDK for Paynow Zimbabwe's API
 
+
+##Typescript Usage 
+
+Fork this repository and compile typescript to start using it in your project. 
+
 ## Sign in to Paynow and get integration details
 
 > Before you can start making requests to Paynow's API, you need to get an integration ID and integration Key from Paynow. Details about how you can retrieve the ID and key are explained in detail on [this page](generation.md)
