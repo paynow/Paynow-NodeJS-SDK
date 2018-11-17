@@ -1,19 +1,17 @@
 const http = require("request-promise-native");
 
-
 //#region StatusResponse Class
 /**
- * 
+ *
  * @property {String} reference - merchant transaction reference .
  * @property {String} amount - original amount for the transaction.
  * @property {String} paynowreference  - the Paynow transaction reference.
  * @property {String} pollurl - the URL on Paynow the merchant can poll to confirm the transaction’s status.
  * @property {String} status - transaction status returned from paynow.
  * @property {String} error - error message sent from Paynow  (if any).
- *  
+ *
  * @param data data from the status response
  */
-
 
 class StatusResponse {
   reference: String;
@@ -39,7 +37,7 @@ class StatusResponse {
 
 //#region InitResponse Class
 /**
- * 
+ *
  * @property {boolean} success - indicates if initiate request was successful or not.
  * @property {boolean} hasRedirect - indicates if the response has a URL to redirect to.
  * @property {String} redirectUrl - the URL the user should be redirected to so they can make a payment.
@@ -47,9 +45,9 @@ class StatusResponse {
  * @property {String} pollUrl  - pollUrl sent from Paynow that can be used to check transaction status.
  * @property {String} instructions - instructions for USSD push for customers to dial incase of mobile money payments.
  * @property {String} status - status from Paynow.
- * 
- * @param data - data from teh Response.   
- * 
+ *
+ * @param data - data from teh Response.
+ *
  */
 
 class InitResponse {
@@ -84,22 +82,26 @@ class InitResponse {
 
 //#region CartItem Class
 class CartItem {
-  constructor(public title: string, public amount: string) { }
+  constructor(public title: string, public amount: string) {}
 }
 
 //#endregion
 
 //#region  Payment  Class
 /**
- *  
+ *
  * @param reference  unique identifier for the transaction.
  * @param authEmail customer's email address.
- * @param items items inthe user's Cart 
- * 
+ * @param items items inthe user's Cart
+ *
  */
 
 class Payment {
-  constructor(public reference: string, public authEmail: string, public items?: CartItem[]) { }
+  constructor(
+    public reference: string,
+    public authEmail: string,
+    public items?: CartItem[]
+  ) {}
   /**
    * Adds an item to the 'shopping cart'
    * @param title
@@ -127,7 +129,7 @@ class Payment {
    * @returns {*|number}
    */
   total() {
-    return this.items.reduce(function (accumulator, value) {
+    return this.items.reduce(function(accumulator, value) {
       return accumulator + Number(value.amount);
     }, 0);
   }
@@ -144,7 +146,12 @@ class Payment {
  **/
 
 class Paynow {
-  constructor(public integrationId: string, public integrationKey: string, public resultUrl: string, public returnUrl: string) { }
+  constructor(
+    public integrationId: string,
+    public integrationKey: string,
+    public resultUrl: string,
+    public returnUrl: string
+  ) {}
 
   /**
    * Send a payment to paynow
@@ -177,7 +184,7 @@ class Paynow {
    * @param message*
    * @returns void
    */
-  fail(message: string) : Error {
+  fail(message: string): Error {
     throw new Error(message);
   }
 
@@ -189,12 +196,14 @@ class Paynow {
   init(payment: Payment) {
     this.validate(payment);
     let data = this.build(payment);
-    return http({
-      method: "POST",
-      uri: URL_INITIATE_TRANSACTION,
-      form: data,
-      json: false
-    }, false
+    return http(
+      {
+        method: "POST",
+        uri: URL_INITIATE_TRANSACTION,
+        form: data,
+        json: false
+      },
+      false
     ).then((response: Response) => {
       return this.parse(response);
     });
@@ -235,7 +244,8 @@ class Paynow {
     if (response) {
       let parsedResponseURL = this.parseQuery(response.url);
 
-      if (response.status.toString() !== "error" &&
+      if (
+        response.status.toString() !== "error" &&
         !this.verifyHash(parsedResponseURL)
       ) {
         throw new Error("Hashes do not match!");
@@ -297,7 +307,7 @@ class Paynow {
   urlDecode(url: string) {
     return decodeURIComponent(
       (url + "")
-        .replace(/%(?![\da-f]{2})/gi, function () {
+        .replace(/%(?![\da-f]{2})/gi, function() {
           return "%25";
         })
         .replace(/\+/g, "%20")
@@ -316,8 +326,7 @@ class Paynow {
     ).split("&");
     for (let i = 0; i < pairs.length; i++) {
       let pair = pairs[i].split("=");
-      query[this.urlDecode(pair[0])] = this.urlDecode(pair[1] || ""
-      );
+      query[this.urlDecode(pair[0])] = this.urlDecode(pair[1] || "");
     }
 
     // if(!this.verifyHash(query))
@@ -359,7 +368,11 @@ class Paynow {
    * @param payment
    * @returns {{resulturl: String, returnurl: String, reference: String, amount: number, id: String, additionalinfo: String, authemail: String, status: String}}
    */
-  buildMobile(payment: Payment, phone: string, method: string): Error |  {[key: string]: string }{
+  buildMobile(
+    payment: Payment,
+    phone: string,
+    method: string
+  ): Error | { [key: string]: string } {
     if (payment.authEmail.length <= 0) {
       throw new Error(
         "Auth email is required for mobile transactions. You can pass it as the second parameter to the createPayment method call"
@@ -440,6 +453,6 @@ class Paynow {
       this.fail("The total should be greater than zero");
     }
   }
-};
+}
 
-module.exports = Paynow
+module.exports = Paynow;
