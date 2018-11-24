@@ -82,10 +82,12 @@ class InitResponse {
 
 //#region CartItem Class
 class CartItem {
-  constructor(public title: string, public amount: string) {}
+  constructor(public title: string, public amount: number, public quantity? : number ) {}
 }
 
 //#endregion
+
+
 
 //#region  Payment  Class
 /**
@@ -108,7 +110,7 @@ class Payment {
    * @param amount
    */
 
-  add(title: string, amount: string): Payment {
+  add(title: string, amount: number): Payment {
     this.items.push(new CartItem(title, amount));
     return this;
   }
@@ -136,6 +138,8 @@ class Payment {
 }
 
 //#endregion
+
+
 
 /**
 
