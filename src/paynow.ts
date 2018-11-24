@@ -81,11 +81,19 @@ class InitResponse {
 //#endregion
 
 //#region CartItem Class
+/**
+ *  @param title the name of the cart item 
+ * 
+ * @param amount the cost of a single unit of the item
+ * 
+ * @param quantity the number of units of the item 
+ */
 class CartItem {
   constructor(public title: string, public amount: number, public quantity? : number ) {}
 }
 
 //#endregion
+
 
 
 
