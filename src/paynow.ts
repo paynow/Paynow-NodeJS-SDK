@@ -81,10 +81,45 @@ class InitResponse {
 //#endregion
 
 //#region CartItem Class
+/**
+ *  @param title the name of the cart item 
+ * 
+ * @param amount the cost of a single unit of the item
+ * 
+ * @param quantity the number of units of the item 
+ */
 class CartItem {
-  constructor(public title: string, public amount: string) {}
+  constructor(public title: string, public amount: number, public quantity? : number ) {}
 }
 
+//#endregion
+
+//#region 
+
+class Cart {
+
+  constructor( public items: CartItem[] ){}
+  length = this.items.length;
+
+  addTo(item:CartItem){
+    this.items.push(item);
+    return this.items.length 
+  }
+
+  getTotal(): number {
+    let cartTotal: number;
+    this.items.forEach((item: CartItem) => {
+      (item.quantity)? cartTotal +=  item.amount *  item.quantity : cartTotal += item.amount
+    });
+    return cartTotal;
+  }
+
+  summary(): string{
+    return this.items.join(', ')
+  }
+
+
+}
 //#endregion
 
 //#region  Payment  Class
@@ -100,7 +135,7 @@ class Payment {
   constructor(
     public reference: string,
     public authEmail: string,
-    public items?: CartItem[]
+    public items?: Cart
   ) {}
   /**
    * Adds an item to the 'shopping cart'
@@ -108,34 +143,27 @@ class Payment {
    * @param amount
    */
 
-  add(title: string, amount: string): Payment {
-    this.items.push(new CartItem(title, amount));
+  add(title: string, amount: number, quantity? : number): Payment {
+    this.items.addTo(new CartItem(title, amount, quantity))
     return this;
   }
 
   info(): string {
-    let stringOfItemsInCart: string;
-    let infoArr: string[] = [];
-    this.items.forEach(itemInCart => {
-      infoArr.push(itemInCart.title);
-    });
-
-    stringOfItemsInCart = infoArr.join(",");
-    return stringOfItemsInCart;
+    return this.items.summary();
   }
 
   /**
    * Get the total of the items in the cart
    * @returns {*|number}
    */
-  total() {
-    return this.items.reduce(function(accumulator, value) {
-      return accumulator + Number(value.amount);
-    }, 0);
+  total(): number {
+    return this.items.getTotal();
   }
 }
 
 //#endregion
+
+
 
 /**
 
@@ -146,12 +174,7 @@ class Payment {
  **/
 
 class Paynow {
-  constructor(
-    public integrationId: string,
-    public integrationKey: string,
-    public resultUrl: string,
-    public returnUrl: string
-  ) {}
+  constructor( public integrationId: string, public integrationKey: string, public resultUrl: string, public returnUrl: string) {}
 
   /**
    * Send a payment to paynow
