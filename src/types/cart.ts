@@ -15,8 +15,12 @@ export class CartItem {
   //#region 
 
 export default class Cart {
-
-    constructor( public items: CartItem[] ){}
+    public items : CartItem[] = [];
+    constructor(_items?: CartItem[] ){
+        if (_items){
+            _items.forEach( thing => { _items.push(thing) });
+        } 
+    }
     length = this.items.length;
   
     addTo(item:CartItem){

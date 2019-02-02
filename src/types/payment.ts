@@ -9,7 +9,7 @@ import Cart, { CartItem } from './cart'
  */
 
 export default class Payment {
-    constructor( public reference: string, public authEmail: string, public items?: Cart ) {}
+    constructor( public reference: string, public authEmail: string, public items: Cart = new Cart() ) {}
 
     /**
      * Adds an item to the 'shopping cart'
