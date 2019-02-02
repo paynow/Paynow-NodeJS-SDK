@@ -19,6 +19,7 @@
     "request-promise-native": "^1.0.5"
   },
   "devDependencies": {
+    "jest": "^24.0.0",
     "typescript": "^3.1.6"
   }
 }
