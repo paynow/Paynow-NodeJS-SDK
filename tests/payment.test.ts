@@ -11,3 +11,10 @@ test('Payment Type Instantiation', () => {
 test('Cart Instatiation on Payment Type', () =>{
     expect(payment.items).toBeDefined();
 })
+
+test('If you can add items to the the cart', () => {
+    let initialCartLength = payment.items.length;
+    payment.add("Test Item", 10, 1);
+    let cartLength = payment.items.length;
+    expect(initialCartLength).toBeLessThan(cartLength);
+})
