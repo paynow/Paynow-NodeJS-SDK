@@ -8,10 +8,17 @@ test('CartItem is 1 if quantity is not added', () => {
 test('CartItem takes value given in constructor if available', () =>{
     let cartItem = new CartItem("Item", 10, 5);
     expect(cartItem.quantity).toBe(5);
-})
+});
 
 test("Cart Instantiation", () => {
     let cart = new Cart();
     expect(cart.items.length).toBe(0); 
-})
+});
 
+test("Adding Items to Cart", () => {
+    let cart = new Cart();
+    cart.add( new CartItem("Item", 10));
+    cart.add( new CartItem("item2", 6));
+
+    expect(cart.items.length).toBe(2);
+});
