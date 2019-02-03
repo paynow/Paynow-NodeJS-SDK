@@ -21,7 +21,9 @@ export default class Cart {
             _items.forEach( thing => { _items.push(thing) });
         } 
     }
-    length = this.items.length;
+    length() : number {
+         return this.items.length;
+    }
   
     addTo(item:CartItem){
       this.items.push(item);
