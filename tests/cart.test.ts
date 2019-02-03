@@ -30,3 +30,11 @@ test(" Cart Total Calculation", () => {
 
     expect(cart.getTotal()).toBe(56);
 });
+
+test("Cart Summary is a string", () => {
+    let cart = new Cart();
+    cart.add( new CartItem("Item", 10, 5));
+    cart.add( new CartItem("item2", 6));
+
+    expect(cart.summary()).toBeTruthy;
+});
