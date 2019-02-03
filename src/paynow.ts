@@ -385,7 +385,7 @@ class Paynow {
    * @param payment
    */
   validate(payment: Payment) {
-    if (payment.items.length <= 0) {
+    if (payment.items.length() <= 0) {
       this.fail("You need to have at least one item in cart");
     }
 
