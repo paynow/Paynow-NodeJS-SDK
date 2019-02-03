@@ -31,9 +31,9 @@ export default class Cart {
     }
   
     getTotal(): number {
-      let cartTotal: number;
+      let cartTotal: number = 0;
       this.items.forEach((item: CartItem) => {
-        (item.quantity)? cartTotal +=  item.amount *  item.quantity : cartTotal += item.amount
+        cartTotal +=  item.amount *  item.quantity;
       });
       return cartTotal;
     }
