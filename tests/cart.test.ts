@@ -22,3 +22,11 @@ test("Adding Items to Cart", () => {
 
     expect(cart.items.length).toBe(2);
 });
+
+test(" Cart Total Calculation", () => {
+    let cart = new Cart();
+    cart.add( new CartItem("Item", 10, 5));
+    cart.add( new CartItem("item2", 6));
+
+    expect(cart.getTotal()).toBe(56);
+});
