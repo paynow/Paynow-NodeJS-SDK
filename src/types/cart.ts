@@ -25,7 +25,7 @@ export default class Cart {
          return this.items.length;
     }
   
-    addTo(item:CartItem){
+    add(item:CartItem){
       this.items.push(item);
       return this.items.length 
     }

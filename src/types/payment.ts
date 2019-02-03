@@ -17,7 +17,7 @@ export default class Payment {
      * @param amount
      */
     add(title: string, amount: number, quantity? : number): Payment {
-      this.items.addTo(new CartItem(title, amount, quantity))
+      this.items.add(new CartItem(title, amount, quantity))
       return this;
     }
   
