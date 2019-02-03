@@ -7,7 +7,7 @@
  * @param quantity the number of units of the item 
  */
 export class CartItem {
-    constructor(public title: string, public amount: number, public quantity? : number ) {}
+    constructor(public title: string, public amount: number, public quantity: number = 1 ) {}
   }
   
   //#endregion
