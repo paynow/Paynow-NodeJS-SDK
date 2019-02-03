@@ -1,5 +1,4 @@
 import Payment from './../src/types/payment'
-import { CartItem } from '../src/types/cart';
 
 let payment = new Payment("test-reference", "pay@abc.xyz");
 
