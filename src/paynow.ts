@@ -6,7 +6,7 @@ const http = require("request-promise-native");
  * @property {String} reference - merchant transaction reference .
  * @property {String} amount - original amount for the transaction.
  * @property {String} paynowreference  - the Paynow transaction reference.
- * @property {String} pollurl - the URL on Paynow the merchant can poll to confirm the transaction’s status.
+ * @property {String} pollUrl - the URL on Paynow the merchant can poll to confirm the transaction’s status.
  * @property {String} status - transaction status returned from paynow.
  * @property {String} error - error message sent from Paynow  (if any).
  *
@@ -16,8 +16,8 @@ const http = require("request-promise-native");
 class StatusResponse {
   reference: String;
   amount: String;
-  paynowreference: String;
-  pollurl: String;
+  paynowReference: String;
+  pollUrl: String;
   status: String;
   error: String;
 
@@ -27,8 +27,8 @@ class StatusResponse {
     } else {
       this.reference = data.reference;
       this.amount = data.amount;
-      this.paynowreference = data.paynowreference;
-      this.pollurl = data.pollurl;
+      this.paynowReference = data.paynowreference;
+      this.pollUrl = data.pollurl;
       this.status = data.status;
     }
   }
