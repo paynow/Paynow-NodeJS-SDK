@@ -5,7 +5,7 @@ const http = require("request-promise-native");
  *
  * @property {String} reference - merchant transaction reference .
  * @property {String} amount - original amount for the transaction.
- * @property {String} paynowreference  - the Paynow transaction reference.
+ * @property {String} paynowReference  - the Paynow transaction reference.
  * @property {String} pollUrl - the URL on Paynow the merchant can poll to confirm the transaction’s status.
  * @property {String} status - transaction status returned from paynow.
  * @property {String} error - error message sent from Paynow  (if any).
@@ -67,9 +67,11 @@ class InitResponse {
     if (!this.success) {
       this.error = data.error;
     } else {
+      
+      this.pollUrl = data.pollurl;
+
       if (this.hasRedirect) {
         this.redirectUrl = data.browserurl;
-        this.pollUrl = data.pollurl;
       }
 
       if (typeof data.instructions !== "undefined") {
