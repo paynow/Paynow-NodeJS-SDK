@@ -4,7 +4,7 @@
   "description": "Node.JS SDK for Zimbabwe's Leading Payment Gateway, Paynow",
   "main": "dist/index.js",
   "scripts": {
-    "test": "jest",
+    "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc --removeComments --sourceMap"
   },
   "repository": {
@@ -13,16 +13,12 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@types/jest": "^23.3.13",
     "@types/node": "^10.12.9",
     "js-sha512": "^0.7.1",
     "request": "^2.87.0",
-    "request-promise-native": "^1.0.5",
-    "save-dev": "^2.0.0",
-    "ts-jest": "^23.10.5"
+    "request-promise-native": "^1.0.5"
   },
   "devDependencies": {
-    "jest": "^24.0.0",
-    "typescript": "^3.3.1"
+    "typescript": "^3.1.6"
   }
 }
