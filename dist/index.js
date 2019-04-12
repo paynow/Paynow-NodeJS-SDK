@@ -11,8 +11,8 @@ var StatusResponse = (function () {
         else {
             this.reference = data.reference;
             this.amount = data.amount;
-            this.paynowreference = data.paynowreference;
-            this.pollurl = data.pollurl;
+            this.paynowReference = data.paynowreference;
+            this.pollUrl = data.pollurl;
             this.status = data.status;
         }
     }
@@ -27,9 +27,9 @@ var InitResponse = (function () {
             this.error = data.error;
         }
         else {
+            this.pollUrl = data.pollurl;
             if (this.hasRedirect) {
                 this.redirectUrl = data.browserurl;
-                this.pollUrl = data.pollurl;
             }
             if (typeof data.instructions !== "undefined") {
                 this.instructions = data.instructions;
@@ -39,11 +39,33 @@ var InitResponse = (function () {
     return InitResponse;
 }());
 var CartItem = (function () {
-    function CartItem(title, amount) {
+    function CartItem(title, amount, quantity) {
         this.title = title;
         this.amount = amount;
+        this.quantity = quantity;
     }
     return CartItem;
+}());
+var Cart = (function () {
+    function Cart(items) {
+        this.items = items;
+        this.length = this.items.length;
+    }
+    Cart.prototype.addTo = function (item) {
+        this.items.push(item);
+        return this.items.length;
+    };
+    Cart.prototype.getTotal = function () {
+        var cartTotal;
+        this.items.forEach(function (item) {
+            (item.quantity) ? cartTotal += item.amount * item.quantity : cartTotal += item.amount;
+        });
+        return cartTotal;
+    };
+    Cart.prototype.summary = function () {
+        return this.items.join(', ');
+    };
+    return Cart;
 }());
 var Payment = (function () {
     function Payment(reference, authEmail, items) {
@@ -51,23 +73,15 @@ var Payment = (function () {
         this.authEmail = authEmail;
         this.items = items;
     }
-    Payment.prototype.add = function (title, amount) {
-        this.items.push(new CartItem(title, amount));
+    Payment.prototype.add = function (title, amount, quantity) {
+        this.items.addTo(new CartItem(title, amount, quantity));
         return this;
     };
     Payment.prototype.info = function () {
-        var stringOfItemsInCart;
-        var infoArr = [];
-        this.items.forEach(function (itemInCart) {
-            infoArr.push(itemInCart.title);
-        });
-        stringOfItemsInCart = infoArr.join(",");
-        return stringOfItemsInCart;
+        return this.items.summary();
     };
     Payment.prototype.total = function () {
-        return this.items.reduce(function (accumulator, value) {
-            return accumulator + Number(value.amount);
-        }, 0);
+        return this.items.getTotal();
     };
     return Payment;
 }());
@@ -250,6 +264,5 @@ var Paynow = (function () {
     };
     return Paynow;
 }());
-;
 module.exports = Paynow;
 //# sourceMappingURL=index.js.map

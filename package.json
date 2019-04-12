@@ -8,8 +8,8 @@
     "build": "tsc --removeComments --sourceMap"
   },
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/paynow/Paynow-NodeJS-SDK.git"
+    "type": "git",
+    "url": "https://github.com/paynow/Paynow-NodeJS-SDK.git"
   },
   "license": "MIT",
   "dependencies": {
