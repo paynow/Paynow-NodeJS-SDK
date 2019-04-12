@@ -1,4 +1,6 @@
 const http = require("request-promise-native");
+import Payment from   './types/payment'
+
 
 //#region StatusResponse Class
 /**
@@ -82,91 +84,6 @@ class InitResponse {
 }
 //#endregion
 
-//#region CartItem Class
-/**
- *  @param title the name of the cart item 
- * 
- * @param amount the cost of a single unit of the item
- * 
- * @param quantity the number of units of the item 
- */
-class CartItem {
-  constructor(public title: string, public amount: number, public quantity? : number ) {}
-}
-
-//#endregion
-
-//#region 
-
-class Cart {
-
-  constructor( public items: CartItem[] ){}
-  length = this.items.length;
-
-  addTo(item:CartItem){
-    this.items.push(item);
-    return this.items.length 
-  }
-
-  getTotal(): number {
-    let cartTotal: number;
-    this.items.forEach((item: CartItem) => {
-      (item.quantity)? cartTotal +=  item.amount *  item.quantity : cartTotal += item.amount
-    });
-    return cartTotal;
-  }
-
-  summary(): string{
-    return this.items.join(', ')
-  }
-
-
-}
-//#endregion
-
-//#region  Payment  Class
-/**
- *
- * @param reference  unique identifier for the transaction.
- * @param authEmail customer's email address.
- * @param items items inthe user's Cart
- *
- */
-
-class Payment {
-  constructor(
-    public reference: string,
-    public authEmail: string,
-    public items?: Cart
-  ) {}
-  /**
-   * Adds an item to the 'shopping cart'
-   * @param title
-   * @param amount
-   */
-
-  add(title: string, amount: number, quantity? : number): Payment {
-    this.items.addTo(new CartItem(title, amount, quantity))
-    return this;
-  }
-
-  info(): string {
-    return this.items.summary();
-  }
-
-  /**
-   * Get the total of the items in the cart
-   * @returns {*|number}
-   */
-  total(): number {
-    return this.items.getTotal();
-  }
-}
-
-//#endregion
-
-
-
 /**
 
  * @param integrationId {String} Merchant's integration id
@@ -239,7 +156,7 @@ class Paynow {
    * @param {Payment} payment
    * @returns {PromiseLike<InitResponse> | Promise<InitResponse>} the response from the initiation of the transaction
    */
-  initMobile(payment: Payment, phone: string, method: string) {
+  initMobile(payment:Payment, phone: string, method: string) {
     this.validate(payment);
 
     let data = this.buildMobile(payment, phone, method);
@@ -470,7 +387,7 @@ class Paynow {
    * @param payment
    */
   validate(payment: Payment) {
-    if (payment.items.length <= 0) {
+    if (payment.items.length() <= 0) {
       this.fail("You need to have at least one item in cart");
     }
 
