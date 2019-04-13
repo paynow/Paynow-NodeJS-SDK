@@ -1,3 +1,5 @@
+![alt text](https://api.travis-ci.com/paynow/Paynow-NodeJS-SDK.svg?branch=master" "Build status")
+
 # Node.JS SDK for Paynow Zimbabwe's API
 
 
