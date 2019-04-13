@@ -1,6 +1,6 @@
 {
   "name": "paynow",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Node.JS SDK for Zimbabwe's Leading Payment Gateway, Paynow",
   "main": "dist/index.js",
   "scripts": {
