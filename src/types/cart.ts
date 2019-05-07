@@ -18,7 +18,7 @@ export default class Cart {
     public items : CartItem[] = [];
     constructor(_items?: CartItem[] ){
         if (_items){
-            _items.forEach( thing => { _items.push(thing) });
+            _items.forEach( thing => { this.items.push(thing) });
         } 
     }
     length() : number {
@@ -39,7 +39,17 @@ export default class Cart {
     }
   
     summary(): string{
-      return this.items.join(', ')
+      let summary = "";
+
+      this.items.forEach(function(item, index) {
+          summary = summary.concat(item.title + ", ");
+      })
+      // console.log(summary, this.items);
+
+      summary = summary.substr(0, summary.length - 3);
+
+
+      return summary;
     }
   
   

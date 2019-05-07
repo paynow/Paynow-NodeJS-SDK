@@ -1,6 +1,11 @@
-const http = require("request-promise-native");
-import Payment from   './types/payment'
-
+import Payment from "./types/payment";
+import * as http from "request-promise-native";
+import {
+  URL_INITIATE_MOBILE_TRANSACTION,
+  URL_INITIATE_TRANSACTION,
+  RESPONSE_ERROR,
+  RESPONSE_OK
+} from "./constants";
 
 //#region StatusResponse Class
 /**
@@ -15,7 +20,7 @@ import Payment from   './types/payment'
  * @param data data from the status response
  */
 
-class StatusResponse {
+export class StatusResponse {
   reference: String;
   amount: String;
   paynowReference: String;
@@ -52,7 +57,7 @@ class StatusResponse {
  *
  */
 
-class InitResponse {
+export class InitResponse {
   success: boolean;
   hasRedirect: boolean;
   redirectUrl: String;
@@ -69,7 +74,6 @@ class InitResponse {
     if (!this.success) {
       this.error = data.error;
     } else {
-      
       this.pollUrl = data.pollurl;
 
       if (this.hasRedirect) {
@@ -85,15 +89,21 @@ class InitResponse {
 //#endregion
 
 /**
-
+ * Paynow Class
+ * 
  * @param integrationId {String} Merchant's integration id
  * @param integrationKey {String} Merchant's integration key
  * @param resultUrl {String} Url where where transaction status will be sent
  * @param returnUrl {String} Url to redirect the user after payment
  **/
 
-class Paynow {
-  constructor( public integrationId: string, public integrationKey: string, public resultUrl: string, public returnUrl: string) {}
+export default class Paynow {
+  constructor(
+    public integrationId: string,
+    public integrationKey: string,
+    public resultUrl: string,
+    public returnUrl: string
+  ) {}
 
   /**
    * Send a payment to paynow
@@ -144,10 +154,11 @@ class Paynow {
         uri: URL_INITIATE_TRANSACTION,
         form: data,
         json: false
-      },
-      false
+      }
     ).then((response: Response) => {
       return this.parse(response);
+    }).catch(function(err) {
+      console.log("An error occured while initiating transaction", err)
     });
   }
 
@@ -156,7 +167,7 @@ class Paynow {
    * @param {Payment} payment
    * @returns {PromiseLike<InitResponse> | Promise<InitResponse>} the response from the initiation of the transaction
    */
-  initMobile(payment:Payment, phone: string, method: string) {
+  initMobile(payment: Payment, phone: string, method: string) {
     this.validate(payment);
 
     let data = this.buildMobile(payment, phone, method);
@@ -167,11 +178,12 @@ class Paynow {
         uri: URL_INITIATE_MOBILE_TRANSACTION,
         form: data,
         json: false
-      },
-      false
+      }
     ).then((response: Response) => {
       return this.parse(response);
-    });
+    }).catch(function(err) {
+      console.log("An error occured while initiating transaction", err)
+    });;
   }
 
   /**
@@ -184,10 +196,10 @@ class Paynow {
       return null;
     }
     if (response) {
-      let parsedResponseURL = this.parseQuery(response.url);
+      let parsedResponseURL = this.parseQuery((response as unknown) as string);
 
       if (
-        response.status.toString() !== "error" &&
+        parsedResponseURL.status.toString() !== "error" &&
         !this.verifyHash(parsedResponseURL)
       ) {
         throw new Error("Hashes do not match!");
@@ -297,7 +309,7 @@ class Paynow {
     for (const key of Object.keys(data)) {
       if (key === "hash") continue;
 
-      data[key] = this.urlEncode(data[key]);
+      data[key] = (data[key]);
     }
 
     data["hash"] = this.generateHash(data, this.integrationKey);
@@ -337,7 +349,7 @@ class Paynow {
     for (const key of Object.keys(data)) {
       if (key === "hash") continue;
 
-      data[key] = this.urlEncode(data[key]);
+      data[key] = (data[key]);
     }
 
     data["hash"] = this.generateHash(data, this.integrationKey);
@@ -357,7 +369,7 @@ class Paynow {
         uri: url,
         json: false
       },
-      false
+      null
     ).then((response: any) => {
       return this.parseStatusUpdate(response);
     });
@@ -396,5 +408,3 @@ class Paynow {
     }
   }
 }
-
-module.exports = Paynow;
