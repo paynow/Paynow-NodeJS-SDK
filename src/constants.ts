@@ -1,7 +1,21 @@
-const RESPONSE_OK : string = "ok";
-const RESPONSE_ERROR: string  = "error";
+/**
+ * Success response from Paynow
+ */
+export const RESPONSE_OK : string = "ok";
 
-const URL_INITIATE_TRANSACTION : string =
+/**
+ * Error response from Paynow
+ */
+export const RESPONSE_ERROR: string  = "error";
+
+/**
+ * API endpoint for initiating normal web-based transactions
+ */
+export const URL_INITIATE_TRANSACTION : string =
   "https://www.paynow.co.zw/interface/initiatetransaction";
-const URL_INITIATE_MOBILE_TRANSACTION: string =
+
+/**
+ * API endpoint for initiating mobile based transactions
+ */
+export const URL_INITIATE_MOBILE_TRANSACTION: string =
   "https://www.paynow.co.zw/interface/remotetransaction";
