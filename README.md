@@ -161,7 +161,7 @@ if (status.paid()) {
 
 ```javascript
 // Require in the Paynow class
-const Paynow = require("paynow");
+const { Paynow } = require("paynow");
 
 // Create instance of Paynow class
 let paynow = new Paynow("INTEGRATION_ID", "INTEGRATION_KEY");
