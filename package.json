@@ -2,7 +2,7 @@
   "name": "paynow",
   "version": "1.0.6",
   "description": "Node.JS SDK for Zimbabwe's Leading Payment Gateway, Paynow",
-  "main": "dist/paynow.js",
+  "main": "dist/index.js",
   "scripts": {
     "test": "echo 'Unit tests have been temporarily disabled.'",
     "build:tsc": "tsc --removeComments --sourceMap",
