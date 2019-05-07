@@ -39,7 +39,7 @@ $ yarn add paynow
 ### Importing library
 
 ```javascript
-const Paynow = require("paynow");
+const { Paynow } = require("paynow");
 ```
 
 Create an instance of the Paynow class optionally setting the result and return url(s)
