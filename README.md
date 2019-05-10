@@ -1,4 +1,4 @@
-![Build Status]https://api.travis-ci.com/paynow/Paynow-NodeJS-SDK.svg?branch=master)(https://api.travis-ci.com/paynow/Paynow-NodeJS-SDK.svg?branch=master)
+[![Build Status](https://travis-ci.com/paynow/Paynow-NodeJS-SDK.svg?branch=master)](https://travis-ci.com/paynow/Paynow-NodeJS-SDK)
 
 
 # Node.JS SDK for Paynow Zimbabwe's API
