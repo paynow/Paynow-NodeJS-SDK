@@ -197,9 +197,10 @@ var Paynow = (function () {
         return http({
             method: "POST",
             uri: url,
+            form: null,
             json: false
-        }, null).then(function (response) {
-            return _this.parseStatusUpdate(response);
+        }).then(function (response) {
+            return _this.parse(response);
         });
     };
     Paynow.prototype.parseStatusUpdate = function (response) {
