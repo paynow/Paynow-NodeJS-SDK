@@ -6,6 +6,7 @@ import {
   RESPONSE_ERROR,
   RESPONSE_OK
 } from "./constants";
+import request = require("request");
 
 //#region StatusResponse Class
 /**
@@ -367,12 +368,12 @@ export default class Paynow {
       {
         method: "POST",
         uri: url,
+        form: null,
         json: false
-      },
-      null
-    ).then((response: any) => {
-      return this.parseStatusUpdate(response);
-    });
+      }
+    ).then((response: Response) => {
+      return this.parse(response);
+    })
   }
 
   /**
