@@ -54,7 +54,7 @@ export class StatusResponse {
  * @property {String} instructions - instructions for USSD push for customers to dial incase of mobile money payments.
  * @property {String} status - status from Paynow.
  *
- * @param data - data from teh Response.
+ * @param data - data from the Response.
  *
  */
 
