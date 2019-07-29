@@ -3,14 +3,14 @@
 
 # Node.JS SDK for Paynow Zimbabwe's API
 
-
-## Typescript Usage 
-
-Fork this repository and compile typescript to start using it in your project. 
-
 ## Sign in to Paynow and get integration details
 
-> Before you can start making requests to Paynow's API, you need to get an integration ID and integration Key from Paynow. Details about how you can retrieve the ID and key are explained in detail on [this page](generation.md)
+> Before you can start making requests to Paynow's API, you need to get an integration ID and integration Key from Paynow. 
+See Documentation [Generating Integration Key and Viewing integration ID](https://developers.paynow.co.zw/docs/integration_generation.html)
+
+## Documentation
+
+See the [Paynow QuickStart](https://developers.paynow.co.zw/docs/quickstart.html).
 
 ## Prerequisites
 
@@ -26,11 +26,6 @@ Install the library using NPM or yarn
 ```sh
 $ npm install --save paynow
 ```
-
-<p align="center">
-Or
-</p>
-
 ```sh
 $ yarn add paynow
 ```
@@ -50,7 +45,9 @@ let paynow = new Paynow("INTEGRATION_ID", "INTEGRATION_KEY");
 
 paynow.resultUrl = "http://example.com/gateways/paynow/update";
 paynow.returnUrl = "http://example.com/return?gateway=paynow";
-// The return url can be set at later stages. You might want to do this if you want to pass data to the return url (like the reference of the transaction)
+
+/* The return url can be set at later stages. 
+You might want to do this if you want to pass data to the return url (like the reference of the transaction) */
 ```
 The Integration ID and Key can be optionally loaded from `PAYNOW_INTEGRATION_ID` and `PAYNOW_INTEGRATION_KEY` environment variables (respectively). An instance of the Paynow class can then be created using the following: 
 
@@ -192,3 +189,8 @@ paynow.send(payment).then( (response) => {
 
 });
 ```
+
+
+## Development 
+
+Fork this repository and clone to local machine
