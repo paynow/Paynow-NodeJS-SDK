@@ -162,7 +162,7 @@ var Paynow = (function () {
             var key = _a[_i];
             if (key === "hash")
                 continue;
-            data[key] = (data[key]);
+            data[key] = this.urlEncode(data[key]);
         }
         data["hash"] = this.generateHash(data, this.integrationKey);
         return data;
