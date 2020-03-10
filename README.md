@@ -95,7 +95,7 @@ paynow.send(payment).then(response => {
 If you want to send an express (mobile) checkout request instead, the only thing that differs is the last step. You make a call to the `sendMobile` in the `paynow` object
 instead of the `send` method.
 
-The `sendMobile` method unlike the `send` method takes in two additional arguments i.e The phone number to send the payment request to and the mobile money method to use for the request. **Note that currently only ecocash is supported**
+The `sendMobile` method unlike the `send` method takes in two additional arguments i.e The phone number to send the payment request to and the mobile money method to use for the request. **Note that currently only Ecocash and OneMoney are supported**
 
 ```javascript
 paynow.sendMobile(payment, '0777000000', 'ecocash').then(response => {
