@@ -171,6 +171,8 @@ export default class Paynow {
   initMobile(payment: Payment, phone: string, method: string) {
     this.validate(payment);
 
+    if(!this.isValidEmail(payment.authEmail)) this.fail("Invalid email. Please ensure that you pass a valid email address when initiating a mobile payment");
+
     let data = this.buildMobile(payment, phone, method);
 
     return http(
@@ -185,6 +187,20 @@ export default class Paynow {
     }).catch(function(err) {
       console.log("An error occured while initiating transaction", err)
     });;
+  }
+
+  /**
+   * Validates whether an email address is valid or not
+   * 
+   * @param {string} emailAddress The email address to validate
+   * 
+   * @returns {boolean} A value indicating an email is valid or not
+   */
+  isValidEmail(emailAddress: string) {
+    if(!emailAddress || emailAddress.length === 0) return false;
+
+    return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
+          .test(emailAddress)
   }
 
   /**
@@ -328,11 +344,6 @@ export default class Paynow {
     phone: string,
     method: string
   ): Error | { [key: string]: string } {
-    if (payment.authEmail.length <= 0) {
-      throw new Error(
-        "Auth email is required for mobile transactions. You can pass it as the second parameter to the createPayment method call"
-      );
-    }
 
     let data: { [key: string]: string } = {
       resulturl: this.resultUrl,
