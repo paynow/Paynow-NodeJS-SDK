@@ -7,13 +7,15 @@
         "noImplicitAny": true,
         "removeComments": true,
         "preserveConstEnums": true,
+        "declaration": true,
         "outDir": "dist/",
+        "declarationDir": "dist/declarations",
         "sourceMap": true
     },
     "include": [
         "src/*"
     ],
     "exclude": [
-        "node_modules",
+        "node_modules"
     ]
 }
