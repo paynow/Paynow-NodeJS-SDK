@@ -38,6 +38,13 @@ $ yarn add paynow
 const { Paynow } = require("paynow");
 ```
 
+### Importing library (Typescript)
+
+```javascript
+import { Paynow } from "paynow";
+```
+
+
 Create an instance of the Paynow class optionally setting the result and return url(s)
 
 ```javascript
