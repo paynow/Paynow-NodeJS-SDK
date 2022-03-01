@@ -7,6 +7,7 @@ export declare class StatusResponse {
     status: String;
     error: String;
     constructor(data: any);
+    paid() : boolean;
 }
 export declare class InitResponse {
     success: boolean;
