@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.InitResponse = exports.StatusResponse = void 0;
 var payment_1 = require("./types/payment");
 var http = require("request-promise-native");
 var constants_1 = require("./constants");
@@ -16,6 +17,9 @@ var StatusResponse = (function () {
             this.status = data.status;
         }
     }
+    StatusResponse.prototype.paid = function () {
+        return this.status.toLowerCase() === "paid";
+    };
     return StatusResponse;
 }());
 exports.StatusResponse = StatusResponse;
@@ -77,6 +81,8 @@ var Paynow = (function () {
     Paynow.prototype.initMobile = function (payment, phone, method) {
         var _this = this;
         this.validate(payment);
+        if (!this.isValidEmail(payment.authEmail))
+            this.fail("Invalid email. Please ensure that you pass a valid email address when initiating a mobile payment");
         var data = this.buildMobile(payment, phone, method);
         return http({
             method: "POST",
@@ -88,7 +94,12 @@ var Paynow = (function () {
         }).catch(function (err) {
             console.log("An error occured while initiating transaction", err);
         });
-        ;
+    };
+    Paynow.prototype.isValidEmail = function (emailAddress) {
+        if (!emailAddress || emailAddress.length === 0)
+            return false;
+        return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
+            .test(emailAddress);
     };
     Paynow.prototype.parse = function (response) {
         if (typeof response === "undefined") {
@@ -168,9 +179,6 @@ var Paynow = (function () {
         return data;
     };
     Paynow.prototype.buildMobile = function (payment, phone, method) {
-        if (payment.authEmail.length <= 0) {
-            throw new Error("Auth email is required for mobile transactions. You can pass it as the second parameter to the createPayment method call");
-        }
         var data = {
             resulturl: this.resultUrl,
             returnurl: this.returnUrl,
@@ -200,7 +208,7 @@ var Paynow = (function () {
             form: null,
             json: false
         }).then(function (response) {
-            return _this.parse(response);
+            return _this.parseStatusUpdate(response);
         });
     };
     Paynow.prototype.parseStatusUpdate = function (response) {

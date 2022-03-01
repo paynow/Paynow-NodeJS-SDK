@@ -6,7 +6,6 @@ import {
   RESPONSE_ERROR,
   RESPONSE_OK
 } from "./constants";
-import request = require("request");
 
 //#region StatusResponse Class
 /**
@@ -39,6 +38,10 @@ export class StatusResponse {
       this.pollUrl = data.pollurl;
       this.status = data.status;
     }
+  }
+
+  paid () {
+    return this.status.toLowerCase() === "paid";
   }
 }
 //#endregion
@@ -91,7 +94,7 @@ export class InitResponse {
 
 /**
  * Paynow Class
- * 
+ *
  * @param integrationId {String} Merchant's integration id
  * @param integrationKey {String} Merchant's integration key
  * @param resultUrl {String} Url where where transaction status will be sent
@@ -117,6 +120,8 @@ export default class Paynow {
   /**
    * Send a mobile money payment to paynow
    * @param payment
+   * @param phone
+   * @param method
    */
   sendMobile(payment: Payment, phone: string, method: string) {
     return this.initMobile(payment, phone, method);
@@ -166,6 +171,8 @@ export default class Paynow {
   /**
    * Initialize a new mobile transaction with PayNow
    * @param {Payment} payment
+   * @param phone
+   * @param method
    * @returns {PromiseLike<InitResponse> | Promise<InitResponse>} the response from the initiation of the transaction
    */
   initMobile(payment: Payment, phone: string, method: string) {
@@ -186,14 +193,14 @@ export default class Paynow {
       return this.parse(response);
     }).catch(function(err) {
       console.log("An error occured while initiating transaction", err)
-    });;
+    });
   }
 
   /**
    * Validates whether an email address is valid or not
-   * 
+   *
    * @param {string} emailAddress The email address to validate
-   * 
+   *
    * @returns {boolean} A value indicating an email is valid or not
    */
   isValidEmail(emailAddress: string) {
@@ -263,8 +270,8 @@ export default class Paynow {
 
   /**
    * URL encodes the given string
-   * @param str {String}
    * @returns {String}
+   * @param url
    */
   urlEncode(url: string) {
     return encodeURI(url);
@@ -272,8 +279,8 @@ export default class Paynow {
 
   /**
    * URL decodes the given string
-   * @param str {String}
    * @returns {String}
+   * @param url
    */
   urlDecode(url: string) {
     return decodeURIComponent(
@@ -337,6 +344,8 @@ export default class Paynow {
   /**
    * Build up a mobile payment into the format required by Paynow
    * @param payment
+   * @param phone
+   * @param method
    * @returns {{resulturl: String, returnurl: String, reference: String, amount: number, id: String, additionalinfo: String, authemail: String, status: String}}
    */
   buildMobile(
@@ -383,7 +392,7 @@ export default class Paynow {
         json: false
       }
     ).then((response: Response) => {
-      return this.parse(response);
+      return this.parseStatusUpdate(response);
     })
   }
 
