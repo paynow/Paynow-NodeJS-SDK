@@ -101,6 +101,12 @@ var Paynow = (function () {
         return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
             .test(emailAddress);
     };
+    Paynow.prototype.isValidEmail = function (emailAddress) {
+        if (!emailAddress || emailAddress.length === 0)
+            return false;
+        return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
+            .test(emailAddress);
+    };
     Paynow.prototype.parse = function (response) {
         if (typeof response === "undefined") {
             return null;
