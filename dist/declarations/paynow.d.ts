@@ -7,7 +7,7 @@ export declare class StatusResponse {
     status: String;
     error: String;
     constructor(data: any);
-    paid() : boolean;
+    paid(): boolean;
 }
 export declare class InitResponse {
     success: boolean;
@@ -50,7 +50,7 @@ export default class Paynow {
     buildMobile(payment: Payment, phone: string, method: string): Error | {
         [key: string]: string;
     };
-    pollTransaction(url: string): Promise<InitResponse>;
+    pollTransaction(url: string): Promise<StatusResponse>;
     parseStatusUpdate(response: any): StatusResponse;
     validate(payment: Payment): void;
 }
