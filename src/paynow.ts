@@ -4,7 +4,9 @@ import {
   URL_INITIATE_MOBILE_TRANSACTION,
   URL_INITIATE_TRANSACTION,
   RESPONSE_ERROR,
-  RESPONSE_OK
+  RESPONSE_OK,
+  GOOGLE_QR_PREFIX,
+  INNBUCKS_DEEPLINK_PREFIX,
 } from "./constants";
 import request = require("request");
 
@@ -66,12 +68,14 @@ export class InitResponse {
   pollUrl: String;
   instructions: String;
   status: String;
+  innbucks_info: Array<any>;
+  isInnbucks: boolean;
 
   constructor(data: any) {
     this.status = data.status.toLowerCase();
     this.success = this.status === RESPONSE_OK;
     this.hasRedirect = typeof data.browserurl !== "undefined";
-
+    this.isInnbucks = false;
     if (!this.success) {
       this.error = data.error;
     } else {
@@ -84,6 +88,17 @@ export class InitResponse {
       if (typeof data.instructions !== "undefined") {
         this.instructions = data.instructions;
       }
+
+      if (typeof data.authorizationcode !== "undefined") {
+        this.isInnbucks = true;
+        this.innbucks_info = [];
+        this.innbucks_info.push({
+          authorizationcode: data.authorizationcode,
+          deep_link_url : INNBUCKS_DEEPLINK_PREFIX + data.authorizationcode,
+          qr_code: GOOGLE_QR_PREFIX + data.authorizationcode,
+          expires_at: data.authorizationexpires,
+        });
+      }
     }
   }
 }
@@ -91,14 +106,14 @@ export class InitResponse {
 
 /**
  * Paynow Class
- * 
+ *
  * @param integrationId {String} Merchant's integration id
  * @param integrationKey {String} Merchant's integration key
  * @param resultUrl {String} Url where where transaction status will be sent
  * @param returnUrl {String} Url to redirect the user after payment
  **/
 
-export default class Paynow {
+export  class Paynow {
   constructor(
     public integrationId: string,
     public integrationKey: string,
@@ -149,18 +164,18 @@ export default class Paynow {
   init(payment: Payment) {
     this.validate(payment);
     let data = this.build(payment);
-    return http(
-      {
-        method: "POST",
-        uri: URL_INITIATE_TRANSACTION,
-        form: data,
-        json: false
-      }
-    ).then((response: Response) => {
-      return this.parse(response);
-    }).catch(function(err) {
-      console.log("An error occured while initiating transaction", err)
-    });
+    return http({
+      method: "POST",
+      uri: URL_INITIATE_TRANSACTION,
+      form: data,
+      json: false,
+    })
+      .then((response: Response) => {
+        return this.parse(response);
+      })
+      .catch(function (err) {
+        console.log("An error occured while initiating transaction", err);
+      });
   }
 
   /**
@@ -171,36 +186,38 @@ export default class Paynow {
   initMobile(payment: Payment, phone: string, method: string) {
     this.validate(payment);
 
-    if(!this.isValidEmail(payment.authEmail)) this.fail("Invalid email. Please ensure that you pass a valid email address when initiating a mobile payment");
+    if (!this.isValidEmail(payment.authEmail))
+      this.fail(
+        "Invalid email. Please ensure that you pass a valid email address when initiating a mobile payment"
+      );
 
     let data = this.buildMobile(payment, phone, method);
 
-    return http(
-      {
-        method: "POST",
-        uri: URL_INITIATE_MOBILE_TRANSACTION,
-        form: data,
-        json: false
-      }
-    ).then((response: Response) => {
-      return this.parse(response);
-    }).catch(function(err) {
-      console.log("An error occured while initiating transaction", err)
-    });;
+    return http({
+      method: "POST",
+      uri: URL_INITIATE_MOBILE_TRANSACTION,
+      form: data,
+      json: false,
+    })
+      .then((response: Response) => {
+        return this.parse(response);
+      })
+      .catch(function (err) {
+        console.log("An error occured while initiating transaction", err);
+      });
   }
 
   /**
    * Validates whether an email address is valid or not
-   * 
+   *
    * @param {string} emailAddress The email address to validate
-   * 
+   *
    * @returns {boolean} A value indicating an email is valid or not
    */
   isValidEmail(emailAddress: string) {
-    if(!emailAddress || emailAddress.length === 0) return false;
+    if (!emailAddress || emailAddress.length === 0) return false;
 
-    return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
-          .test(emailAddress)
+    return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(emailAddress);
   }
 
   /**
@@ -213,7 +230,7 @@ export default class Paynow {
       return null;
     }
     if (response) {
-      let parsedResponseURL = this.parseQuery((response as unknown) as string);
+      let parsedResponseURL = this.parseQuery(response as unknown as string);
 
       if (
         parsedResponseURL.status.toString() !== "error" &&
@@ -278,7 +295,7 @@ export default class Paynow {
   urlDecode(url: string) {
     return decodeURIComponent(
       (url + "")
-        .replace(/%(?![\da-f]{2})/gi, function() {
+        .replace(/%(?![\da-f]{2})/gi, function () {
           return "%25";
         })
         .replace(/\+/g, "%20")
@@ -291,9 +308,8 @@ export default class Paynow {
    */
   parseQuery(queryString: string) {
     let query: { [key: string]: string } = {};
-    let pairs = (queryString[0] === "?"
-      ? queryString.substr(1)
-      : queryString
+    let pairs = (
+      queryString[0] === "?" ? queryString.substr(1) : queryString
     ).split("&");
     for (let i = 0; i < pairs.length; i++) {
       let pair = pairs[i].split("=");
@@ -320,7 +336,7 @@ export default class Paynow {
       additionalinfo: payment.info(),
       authemail:
         typeof payment.authEmail === "undefined" ? "" : payment.authEmail,
-      status: "Message"
+      status: "Message",
     };
 
     for (const key of Object.keys(data)) {
@@ -344,7 +360,6 @@ export default class Paynow {
     phone: string,
     method: string
   ): Error | { [key: string]: string } {
-
     let data: { [key: string]: string } = {
       resulturl: this.resultUrl,
       returnurl: this.returnUrl,
@@ -355,7 +370,7 @@ export default class Paynow {
       authemail: payment.authEmail,
       phone: phone,
       method: method,
-      status: "Message"
+      status: "Message",
     };
 
     for (const key of Object.keys(data)) {
@@ -375,16 +390,14 @@ export default class Paynow {
    * @returns {PromiseLike<InitResponse> | Promise<InitResponse>}
    */
   pollTransaction(url: string) {
-    return http(
-      {
-        method: "POST",
-        uri: url,
-        form: null,
-        json: false
-      }
-    ).then((response: Response) => {
+    return http({
+      method: "POST",
+      uri: url,
+      form: null,
+      json: false,
+    }).then((response: Response) => {
       return this.parse(response);
-    })
+    });
   }
 
   /**
