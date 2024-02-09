@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Paynow = exports.InitResponse = exports.StatusResponse = void 0;
 var payment_1 = require("./types/payment");
 var http = require("request-promise-native");
 var constants_1 = require("./constants");
@@ -24,6 +25,7 @@ var InitResponse = (function () {
         this.status = data.status.toLowerCase();
         this.success = this.status === constants_1.RESPONSE_OK;
         this.hasRedirect = typeof data.browserurl !== "undefined";
+        this.isInnbucks = false;
         if (!this.success) {
             this.error = data.error;
         }
@@ -34,6 +36,16 @@ var InitResponse = (function () {
             }
             if (typeof data.instructions !== "undefined") {
                 this.instructions = data.instructions;
+            }
+            if (typeof data.authorizationcode !== "undefined") {
+                this.isInnbucks = true;
+                this.innbucks_info = [];
+                this.innbucks_info.push({
+                    authorizationcode: data.authorizationcode,
+                    deep_link_url: constants_1.INNBUCKS_DEEPLINK_PREFIX + data.authorizationcode,
+                    qr_code: constants_1.GOOGLE_QR_PREFIX + data.authorizationcode,
+                    expires_at: data.authorizationexpires,
+                });
             }
         }
     }
@@ -67,28 +79,38 @@ var Paynow = (function () {
             method: "POST",
             uri: constants_1.URL_INITIATE_TRANSACTION,
             form: data,
-            json: false
-        }).then(function (response) {
+            json: false,
+        })
+            .then(function (response) {
             return _this.parse(response);
-        }).catch(function (err) {
+        })
+            .catch(function (err) {
             console.log("An error occured while initiating transaction", err);
         });
     };
     Paynow.prototype.initMobile = function (payment, phone, method) {
         var _this = this;
         this.validate(payment);
+        if (!this.isValidEmail(payment.authEmail))
+            this.fail("Invalid email. Please ensure that you pass a valid email address when initiating a mobile payment");
         var data = this.buildMobile(payment, phone, method);
         return http({
             method: "POST",
             uri: constants_1.URL_INITIATE_MOBILE_TRANSACTION,
             form: data,
-            json: false
-        }).then(function (response) {
+            json: false,
+        })
+            .then(function (response) {
             return _this.parse(response);
-        }).catch(function (err) {
+        })
+            .catch(function (err) {
             console.log("An error occured while initiating transaction", err);
         });
-        ;
+    };
+    Paynow.prototype.isValidEmail = function (emailAddress) {
+        if (!emailAddress || emailAddress.length === 0)
+            return false;
+        return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(emailAddress);
     };
     Paynow.prototype.parse = function (response) {
         if (typeof response === "undefined") {
@@ -138,9 +160,7 @@ var Paynow = (function () {
     };
     Paynow.prototype.parseQuery = function (queryString) {
         var query = {};
-        var pairs = (queryString[0] === "?"
-            ? queryString.substr(1)
-            : queryString).split("&");
+        var pairs = (queryString[0] === "?" ? queryString.substr(1) : queryString).split("&");
         for (var i = 0; i < pairs.length; i++) {
             var pair = pairs[i].split("=");
             query[this.urlDecode(pair[0])] = this.urlDecode(pair[1] || "");
@@ -156,7 +176,7 @@ var Paynow = (function () {
             id: this.integrationId,
             additionalinfo: payment.info(),
             authemail: typeof payment.authEmail === "undefined" ? "" : payment.authEmail,
-            status: "Message"
+            status: "Message",
         };
         for (var _i = 0, _a = Object.keys(data); _i < _a.length; _i++) {
             var key = _a[_i];
@@ -168,9 +188,6 @@ var Paynow = (function () {
         return data;
     };
     Paynow.prototype.buildMobile = function (payment, phone, method) {
-        if (payment.authEmail.length <= 0) {
-            throw new Error("Auth email is required for mobile transactions. You can pass it as the second parameter to the createPayment method call");
-        }
         var data = {
             resulturl: this.resultUrl,
             returnurl: this.returnUrl,
@@ -181,7 +198,7 @@ var Paynow = (function () {
             authemail: payment.authEmail,
             phone: phone,
             method: method,
-            status: "Message"
+            status: "Message",
         };
         for (var _i = 0, _a = Object.keys(data); _i < _a.length; _i++) {
             var key = _a[_i];
@@ -198,7 +215,7 @@ var Paynow = (function () {
             method: "POST",
             uri: url,
             form: null,
-            json: false
+            json: false,
         }).then(function (response) {
             return _this.parse(response);
         });
@@ -225,5 +242,5 @@ var Paynow = (function () {
     };
     return Paynow;
 }());
-exports.default = Paynow;
+exports.Paynow = Paynow;
 //# sourceMappingURL=paynow.js.map

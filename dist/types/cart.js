@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.CartItem = void 0;
 var CartItem = (function () {
     function CartItem(title, amount, quantity) {
         if (quantity === void 0) { quantity = 1; }
