@@ -1,27 +1,36 @@
 {
-  "name": "paynow",
-  "version": "1.2.0",
+  "name": "better-paynow",
+  "version": "0.1.0",
   "description": "Node.JS SDK for Zimbabwe's Leading Payment Gateway, Paynow",
   "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "test": "echo 'Unit tests have been temporarily disabled.'",
-    "build:tsc": "tsc --removeComments --sourceMap",
-    "build": "npm run build:tsc"
+    "build": "tsup"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/paynow/Paynow-NodeJS-SDK.git"
   },
   "license": "MIT",
+  "author": "Tendai Pfidze",
+  "keywords": [
+    "paynow",
+    "zimbabwe-payments",
+    "ecocash",
+    "innbucks"
+  ],
   "dependencies": {
     "js-sha512": "^0.7.1",
     "request": "^2.87.0",
-    "request-promise-native": "^1.0.5"
+    "request-promise-native": "^1.0.5",
+    "urlencode": "^2.0.0"
   },
   "devDependencies": {
     "@types/node": "^10.12.9",
     "@types/request-promise-native": "^1.0.16",
     "concat": "^1.0.3",
-    "typescript": "^3.3.1"
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.3"
   }
 }

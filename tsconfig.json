@@ -1,17 +1,16 @@
 {
     "compilerOptions": {
-      "baseUrl": ".",
-      "paths": { "*": ["types/*"] },
+        "strict": false,
         "target": "es5",
         "module": "commonjs",
         "noImplicitAny": true,
         "removeComments": true,
         "preserveConstEnums": true,
-        "outDir": "dist/",
+        "outDir": "dist",
         "sourceMap": true
     },
     "include": [
-        "src/*"
+        "src"
     ],
     "exclude": [
         "node_modules",
