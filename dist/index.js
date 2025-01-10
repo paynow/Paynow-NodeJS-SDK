@@ -222,12 +222,17 @@ var URL_INITIATE_TRANSACTION = "https://www.paynow.co.zw/interface/initiatetrans
 var URL_INITIATE_MOBILE_TRANSACTION = "https://www.paynow.co.zw/interface/remotetransaction";
 var INNBUCKS_DEEPLINK_PREFIX = "schinn.wbpycode://innbucks.co.zw?pymInnCode=";
 var GOOGLE_QR_PREFIX = "https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=";
+var PAID_STATUSES = [
+    "Awaiting Delivery",
+    "Delivered",
+    "Paid"
+];
 // src/components/init-response.ts
 var InitResponse = function InitResponse(data) {
     "use strict";
     _class_call_check(this, InitResponse);
-    this.status = data.status.toLowerCase();
-    this.success = this.status === RESPONSE_OK;
+    this.status = data.status;
+    this.success = this.status.toLowerCase() === RESPONSE_OK;
     this.hasRedirect = data.browserurl ? true : false;
     this.isInnbucks = false;
     if (!this.success) {
@@ -359,19 +364,30 @@ var Payment = /*#__PURE__*/ function() {
     return Payment;
 }();
 // src/components/status-response.ts
-var StatusResponse = function StatusResponse(data) {
+var StatusResponse = /*#__PURE__*/ function() {
     "use strict";
-    _class_call_check(this, StatusResponse);
-    if (data.status.toLowerCase() === RESPONSE_ERROR) {
-        this.error = data.error;
-    } else {
-        this.reference = data.reference;
-        this.amount = data.amount;
-        this.paynowReference = data.paynowreference;
-        this.pollUrl = data.pollurl;
-        this.status = data.status;
+    function StatusResponse(data) {
+        _class_call_check(this, StatusResponse);
+        if (data.status.toLowerCase() === RESPONSE_ERROR) {
+            this.error = data.error;
+        } else {
+            this.reference = data.reference;
+            this.amount = data.amount;
+            this.paynowReference = data.paynowreference;
+            this.pollUrl = data.pollurl;
+            this.status = data.status;
+        }
     }
-};
+    _create_class(StatusResponse, [
+        {
+            key: "paid",
+            value: function paid() {
+                return PAID_STATUSES.includes(this.status);
+            }
+        }
+    ]);
+    return StatusResponse;
+}();
 // src/paynow.ts
 var import_urlencode = require("urlencode");
 var Paynow = /*#__PURE__*/ function() {
@@ -685,7 +701,7 @@ var Paynow = /*#__PURE__*/ function() {
    */ function pollTransaction(url) {
                 var _this = this;
                 return _async_to_generator(function() {
-                    var response, responseData, error;
+                    var response, responseData, parsedResponseURL, error;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
@@ -709,9 +725,13 @@ var Paynow = /*#__PURE__*/ function() {
                                 ];
                             case 2:
                                 responseData = _state.sent();
+                                parsedResponseURL = _this.parseQuery(responseData);
+                                if (parsedResponseURL["status"].toLowerCase() !== "error" && !_this.verifyHash(parsedResponseURL)) {
+                                    throw new Error("Hashes do not match!");
+                                }
                                 return [
                                     2,
-                                    _this.parse(responseData)
+                                    new StatusResponse(parsedResponseURL)
                                 ];
                             case 3:
                                 error = _state.sent();
@@ -737,11 +757,11 @@ var Paynow = /*#__PURE__*/ function() {
    */ key: "parseStatusUpdate",
             value: function parseStatusUpdate(response) {
                 if (response) {
-                    response = this.parseQuery(response);
-                    if (!this.verifyHash(response)) {
+                    var parsedResponse = this.parseQuery(response);
+                    if (!this.verifyHash(parsedResponse)) {
                         throw new Error("Hashes do not match!");
                     }
-                    return new StatusResponse(response);
+                    return new StatusResponse(parsedResponse);
                 } else {
                     throw new Error("An unknown error occurred");
                 }

@@ -1,3 +1,5 @@
+import { PAID_STATUSES, RESPONSE_ERROR } from "../constants";
+
 /**
  *
  * @property {String} reference - merchant transaction reference .
@@ -9,16 +11,13 @@
  *
  * @param data data from the status response
  */
-
-import { RESPONSE_ERROR } from "../constants";
-
 export class StatusResponse {
-    reference: String;
-    amount: String;
-    paynowReference: String;
-    pollUrl: String;
-    status: String;
-    error: String;
+    reference: string;
+    amount: string;
+    paynowReference: string;
+    pollUrl: string;
+    status: string;
+    error: string;
 
     constructor(data: any) {
         if (data.status.toLowerCase() === RESPONSE_ERROR) {
@@ -30,5 +29,9 @@ export class StatusResponse {
             this.pollUrl = data.pollurl;
             this.status = data.status;
         }
+    }
+
+    paid(): boolean {
+        return PAID_STATUSES.includes(this.status)
     }
 }

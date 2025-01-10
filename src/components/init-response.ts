@@ -1,3 +1,6 @@
+import { GOOGLE_QR_PREFIX, INNBUCKS_DEEPLINK_PREFIX, RESPONSE_OK } from "../constants";
+import { InnBucksInfo } from "../types";
+
 /**
  *
  * @property {boolean} success - indicates if initiate request was successful or not.
@@ -11,10 +14,6 @@
  * @param data - data from the Response.
  *
  */
-
-import { GOOGLE_QR_PREFIX, INNBUCKS_DEEPLINK_PREFIX, RESPONSE_OK } from "../constants";
-import { InnBucksInfo } from "../types";
-
 export class InitResponse {
     success: boolean;
     hasRedirect: boolean;
@@ -27,8 +26,8 @@ export class InitResponse {
     isInnbucks: boolean;
 
     constructor(data: any) {
-        this.status = data.status.toLowerCase();
-        this.success = this.status === RESPONSE_OK;
+        this.status = data.status;
+        this.success = this.status.toLowerCase() === RESPONSE_OK;
         this.hasRedirect = data.browserurl ? true : false;
         this.isInnbucks = false;
 

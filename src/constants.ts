@@ -21,3 +21,5 @@ export const URL_INITIATE_MOBILE_TRANSACTION: string = "https://www.paynow.co.zw
 export const INNBUCKS_DEEPLINK_PREFIX = "schinn.wbpycode://innbucks.co.zw?pymInnCode=";
 export const GOOGLE_QR_PREFIX = "https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=";
 
+export const PAID_STATUSES = ["Awaiting Delivery", "Delivered", "Paid"]
+

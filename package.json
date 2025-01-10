@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/paynow/Paynow-NodeJS-SDK.git"
+    "url": "https://github.com/pondem87/Paynow-Typescript-SDK.git"
   },
   "license": "MIT",
   "author": "Tendai Pfidze",

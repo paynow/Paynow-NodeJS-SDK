@@ -261,16 +261,22 @@ export class Paynow {
      * @param url
      * @returns {PromiseLike<InitResponse> | Promise<InitResponse>}
      */
-    async pollTransaction(url: string) {
+    async pollTransaction(url: string): Promise<StatusResponse> {
         try {
             const response = await fetch(
                 url,
-                { method: "POST"}
+                { method: "POST" }
             )
 
             const responseData = await response.json()
 
-            return this.parse(responseData)
+            const parsedResponseURL = this.parseQuery(responseData as unknown as string);
+
+            if (parsedResponseURL["status"].toLowerCase() !== "error" && !this.verifyHash(parsedResponseURL)) {
+                throw new Error("Hashes do not match!");
+            }
+
+            return new StatusResponse(parsedResponseURL);
         } catch (error) {
             console.log("Paynow.pollTransaction: Error occurred while initialising payment", error)
         }
@@ -281,15 +287,15 @@ export class Paynow {
      * @param response
      * @returns {StatusResponse}
      */
-    parseStatusUpdate(response: any) {
+    parseStatusUpdate(response: any): StatusResponse {
         if (response) {
-            response = this.parseQuery(response);
+            const parsedResponse = this.parseQuery(response);
 
-            if (!this.verifyHash(response)) {
+            if (!this.verifyHash(parsedResponse)) {
                 throw new Error("Hashes do not match!");
             }
 
-            return new StatusResponse(response);
+            return new StatusResponse(parsedResponse);
         } else {
             throw new Error("An unknown error occurred");
         }
