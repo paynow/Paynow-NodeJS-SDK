@@ -1,7 +1,4 @@
-[![Build Status](https://travis-ci.com/paynow/Paynow-NodeJS-SDK.svg?branch=master)](https://travis-ci.com/paynow/Paynow-NodeJS-SDK)
-
-
-# Node.JS SDK for Paynow Zimbabwe's API
+# Typescript SDK for Paynow Zimbabwe's API
 
 ## Sign in to Paynow and get integration details
 
@@ -16,7 +13,7 @@ See the [Paynow QuickStart](https://developers.paynow.co.zw/docs/quickstart.html
 
 This library has a set of prerequisites that must be met for it to work
 
-1.  Node version 0.6.0 and above
+1.  Node
 1.  NPM (node's package manager, used to install the node library)
 
 ## Installation
@@ -24,24 +21,24 @@ This library has a set of prerequisites that must be met for it to work
 Install the library using NPM or yarn
 
 ```sh
-$ npm install --save paynow
+$ npm install --save better-paynow
 ```
 ```sh
-$ yarn add paynow
+$ yarn add better-paynow
 ```
 
 ## Usage example
 
 ### Importing library
 
-```javascript
-const { Paynow } = require("paynow");
+```typescript
+import { Paynow } from "better-paynow";
 ```
 
 Create an instance of the Paynow class optionally setting the result and return url(s)
 
 ```javascript
-let paynow = new Paynow("INTEGRATION_ID", "INTEGRATION_KEY");
+const paynow = new Paynow("INTEGRATION_ID", "INTEGRATION_KEY");
 
 paynow.resultUrl = "http://example.com/gateways/paynow/update";
 paynow.returnUrl = "http://example.com/return?gateway=paynow";
@@ -51,19 +48,19 @@ You might want to do this if you want to pass data to the return url (like the r
 ```
 The Integration ID and Key can be optionally loaded from `PAYNOW_INTEGRATION_ID` and `PAYNOW_INTEGRATION_KEY` environment variables (respectively). An instance of the Paynow class can then be created using the following: 
 
-```javascript
-let paynow = new Paynow();
+```typescript
+const paynow = new Paynow();
 ```
 
 Create a new payment passing in the reference for that payment (e.g invoice id, or anything that you can use to identify the transaction.
 
-```javascript
-let payment = paynow.createPayment("Invoice 35");
+```typescript
+const payment = paynow.createPayment("unique-reference-id-for-each-payment");
 ```
 
 You can then start adding items to the payment
 
-```javascript
+```typescript
 // Passing in the name of the item and the price of the item
 payment.add("Bananas", 2.5);
 payment.add("Apples", 3.4);
@@ -80,7 +77,7 @@ The send method will return a `Promise<InitResponse>`, the InitResponse object b
 
 If request was successful, you should consider saving the poll url sent from Paynow in your database
 
-```javascript
+```typescript
 paynow.send(payment).then(response => {
   // Check if request was successful
   if (response.success) {
@@ -97,7 +94,7 @@ instead of the `send` method.
 
 The `sendMobile` method unlike the `send` method takes in two additional arguments i.e The phone number to send the payment request to and the mobile money method to use for the request. **Note that currently only Ecocash and OneMoney are supported**
 
-```javascript
+```typescript
 paynow.sendMobile(payment, '0777000000', 'ecocash').then(response => {
   // Handle response
 });
@@ -105,7 +102,7 @@ paynow.sendMobile(payment, '0777000000', 'ecocash').then(response => {
 
 The response object is almost identical to the one you get if you send a normal request. With a few differences, firstly, you don't get a url to redirect to. Instead you instructions (which ideally should be shown to the user instructing them how to make payment on their mobile phone)
 
-```javascript
+```typescript
 paynow.sendMobile(
     
     // The payment to send to Paynow
@@ -132,44 +129,39 @@ paynow.sendMobile(
     } else {
         console.log(response.error)
     }
-}).catch(ex => {
+}).catch(ex) {
     // Ahhhhhhhhhhhhhhh
     // *freak out*
     console.log('Your application has broken an axle', ex)
-});
+};
 ```
 
 # Checking transaction status
 
 The SDK exposes a handy method that you can use to check the status of a transaction. Once you have instantiated the Paynow class.
 
-```javascript
+```typescript
 // Check the status of the transaction with the specified pollUrl
 // Now you see why you need to save that url ;-)
-let status = paynow.pollTransaction(pollUrl);
+const status = await paynow.pollTransaction(pollUrl);
 
-if (status.paid()) {
-  // Yay! Transaction was paid for
-} else {
-  console.log("Why you no pay?");
-}
 ```
 
 ## Full Usage Example
 
-```javascript
+```typescript
 // Require in the Paynow class
-const { Paynow } = require("paynow");
+import { Paynow } from "better-paynow";
 
 // Create instance of Paynow class
-let paynow = new Paynow("INTEGRATION_ID", "INTEGRATION_KEY");
+const paynow = new Paynow("INTEGRATION_ID", "INTEGRATION_KEY");
 
 // Set return and result urls
 paynow.resultUrl = "http://example.com/gateways/paynow/update";
 paynow.returnUrl = "http://example.com/return?gateway=paynow";
 
 // Create a new payment
-let payment = paynow.createPayment("Invoice 35");
+const payment = paynow.createPayment("Invoice 35");
 
 // Add items to the payment list passing in the name of the item and it's price
 payment.add("Bananas", 2.5);

@@ -17,8 +17,8 @@ import { decode } from "urlencode";
  */
 export class Paynow {
     constructor(
-        public integrationId: string,
-        public integrationKey: string,
+        public integrationId: string = process.env.PAYNOW_INTEGRATION_ID,
+        public integrationKey: string = process.env.PAYNOW_INTEGRATION_KEY,
         public resultUrl: string,
         public returnUrl: string
     ) { }

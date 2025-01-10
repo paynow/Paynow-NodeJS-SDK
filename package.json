@@ -27,6 +27,7 @@
     "urlencode": "^2.0.0"
   },
   "devDependencies": {
+    "@swc/core": "^1.10.7",
     "@types/node": "^10.12.9",
     "@types/request-promise-native": "^1.0.16",
     "concat": "^1.0.3",
