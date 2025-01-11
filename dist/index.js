@@ -389,11 +389,11 @@ var StatusResponse = /*#__PURE__*/ function() {
     return StatusResponse;
 }();
 // src/paynow.ts
-var import_urlencode = require("urlencode");
+var sha512 = require("js-sha512").sha512;
 var Paynow = /*#__PURE__*/ function() {
     "use strict";
     function Paynow() {
-        var integrationId = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : process.env.PAYNOW_INTEGRATION_ID, integrationKey = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : process.env.PAYNOW_INTEGRATION_KEY, resultUrl = arguments.length > 2 ? arguments[2] : void 0, returnUrl = arguments.length > 3 ? arguments[3] : void 0;
+        var integrationId = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : process.env.PAYNOW_INTEGRATION_ID, integrationKey = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : process.env.PAYNOW_INTEGRATION_KEY, resultUrl = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : "", returnUrl = arguments.length > 3 && arguments[3] !== void 0 ? arguments[3] : "";
         _class_call_check(this, Paynow);
         this.integrationId = integrationId;
         this.integrationKey = integrationKey;
@@ -459,35 +459,40 @@ var Paynow = /*#__PURE__*/ function() {
                             case 1:
                                 _state.trys.push([
                                     1,
-                                    3,
+                                    4,
                                     ,
-                                    4
+                                    5
                                 ]);
                                 return [
                                     4,
                                     fetch(URL_INITIATE_TRANSACTION, {
                                         method: "POST",
                                         headers: {
-                                            "Content-Type": "application/json"
+                                            "Content-Type": "application/x-www-form-urlencoded"
                                         },
-                                        body: JSON.stringify(data)
+                                        body: new URLSearchParams(data).toString()
                                     })
                                 ];
                             case 2:
                                 response = _state.sent();
-                                responseData = response.json();
+                                return [
+                                    4,
+                                    response.text()
+                                ];
+                            case 3:
+                                responseData = _state.sent();
                                 return [
                                     2,
                                     _this.parse(responseData)
                                 ];
-                            case 3:
+                            case 4:
                                 error = _state.sent();
                                 console.log("Paynow.init: Error occurred while initialising payment", error);
                                 return [
                                     3,
-                                    4
+                                    5
                                 ];
-                            case 4:
+                            case 5:
                                 return [
                                     2
                                 ];
@@ -516,35 +521,41 @@ var Paynow = /*#__PURE__*/ function() {
                             case 1:
                                 _state.trys.push([
                                     1,
-                                    3,
+                                    4,
                                     ,
-                                    4
+                                    5
                                 ]);
                                 return [
                                     4,
                                     fetch(URL_INITIATE_MOBILE_TRANSACTION, {
                                         method: "POST",
                                         headers: {
-                                            "Content-Type": "application/json"
+                                            "Content-Type": "application/x-www-form-urlencoded"
                                         },
-                                        body: JSON.stringify(data)
+                                        body: new URLSearchParams(data).toString()
                                     })
                                 ];
                             case 2:
                                 response = _state.sent();
-                                responseData = response.json();
+                                return [
+                                    4,
+                                    response.text()
+                                ];
+                            case 3:
+                                responseData = _state.sent();
+                                console.log("In Paynow.initMobileResponse: Response Data: ".concat(responseData));
                                 return [
                                     2,
                                     _this.parse(responseData)
                                 ];
-                            case 3:
+                            case 4:
                                 error = _state.sent();
                                 console.log("Paynow.initMobile: Error occurred while initialising payment", error);
                                 return [
                                     3,
-                                    4
+                                    5
                                 ];
-                            case 4:
+                            case 5:
                                 return [
                                     2
                                 ];
@@ -592,7 +603,6 @@ var Paynow = /*#__PURE__*/ function() {
    * 
    */ key: "generateHash",
             value: function generateHash(values, integrationKey) {
-                var sha512 = require("js-sha512").sha512;
                 var string = "";
                 var _iteratorNormalCompletion = true, _didIteratorError = false, _iteratorError = undefined;
                 try {
@@ -642,8 +652,9 @@ var Paynow = /*#__PURE__*/ function() {
                 var query = {};
                 var pairs = (queryString[0] === "?" ? queryString.slice(1) : queryString).split("&");
                 for(var i = 0; i < pairs.length; i++){
+                    console.log("Raw pair: ".concat(pairs[i]));
                     var pair = pairs[i].split("=");
-                    query[(0, import_urlencode.decode)(pair[0]).toLowerCase()] = (0, import_urlencode.decode)(pair[1]);
+                    query[decodeURIComponent(pair[0]).toLowerCase()] = decodeURIComponent(pair[1].replace(/\+/g, " "));
                 }
                 return query;
             }
@@ -713,15 +724,13 @@ var Paynow = /*#__PURE__*/ function() {
                                 ]);
                                 return [
                                     4,
-                                    fetch(url, {
-                                        method: "POST"
-                                    })
+                                    fetch(url)
                                 ];
                             case 1:
                                 response = _state.sent();
                                 return [
                                     4,
-                                    response.json()
+                                    response.text()
                                 ];
                             case 2:
                                 responseData = _state.sent();

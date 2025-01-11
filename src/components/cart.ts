@@ -60,7 +60,7 @@ export class Cart {
         })
         // console.log(summary, this.items);
 
-        summary = summary.slice(0, summary.length - 3);
+        summary = summary.slice(0, summary.length - 2);
 
 
         return summary;

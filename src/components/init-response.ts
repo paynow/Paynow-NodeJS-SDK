@@ -21,6 +21,7 @@ export class InitResponse {
     error: string;
     pollUrl: string;
     instructions: string;
+    paynowReference: string;
     status: string;
     innbucks_info: InnBucksInfo[];
     isInnbucks: boolean;
@@ -35,6 +36,7 @@ export class InitResponse {
             this.error = data.error;
         } else {
             this.pollUrl = data.pollurl;
+            this.paynowReference = data.paynowreference;
 
             if (this.hasRedirect) {
                 this.redirectUrl = data.browserurl;

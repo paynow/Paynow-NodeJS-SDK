@@ -2,7 +2,7 @@ import { InitResponse } from "./components/init-response";
 import { Payment } from "./components/payment";
 import { StatusResponse } from "./components/status-response";
 import { URL_INITIATE_MOBILE_TRANSACTION, URL_INITIATE_TRANSACTION } from "./constants";
-import { decode } from "urlencode";
+const { sha512 } = require("js-sha512");
 
 
 /**
@@ -19,8 +19,8 @@ export class Paynow {
     constructor(
         public integrationId: string = process.env.PAYNOW_INTEGRATION_ID,
         public integrationKey: string = process.env.PAYNOW_INTEGRATION_KEY,
-        public resultUrl: string,
-        public returnUrl: string
+        public resultUrl: string = "",
+        public returnUrl: string = ""
     ) { }
 
     /**
@@ -73,13 +73,13 @@ export class Paynow {
                 {
                     method: "POST",
                     headers: {
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/x-www-form-urlencoded",
                     },
-                    body: JSON.stringify(data)
+                    body: new URLSearchParams(data).toString()
                 }
             )
 
-            const responseData = response.json()
+            const responseData = await response.text()
 
             return this.parse(responseData)
 
@@ -109,13 +109,13 @@ export class Paynow {
                 {
                     method: "POST",
                     headers: {
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/x-www-form-urlencoded",
                     },
-                    body: JSON.stringify(data)
+                    body: new URLSearchParams(data).toString()
                 }
             )
 
-            const responseData = response.json()
+            const responseData = await response.text()
 
             return this.parse(responseData)
 
@@ -164,7 +164,6 @@ export class Paynow {
      * 
      */
     generateHash(values: { [key: string]: string }, integrationKey: String) {
-        let sha512 = require("js-sha512").sha512;
         let string: string = "";
 
         for (const key of Object.keys(values)) {
@@ -200,7 +199,8 @@ export class Paynow {
         for (let i = 0; i < pairs.length; i++) {
             let pair = pairs[i].split("=");
             // lower case keys but do not lower case values before calculating hash
-            query[decode(pair[0]).toLowerCase()] = decode(pair[1]);
+            query[decodeURIComponent(pair[0]).toLowerCase()] = decodeURIComponent(pair[1].replace(/\+/g, " "));
+
         }
 
         return query;
@@ -263,12 +263,9 @@ export class Paynow {
      */
     async pollTransaction(url: string): Promise<StatusResponse> {
         try {
-            const response = await fetch(
-                url,
-                { method: "POST" }
-            )
+            const response = await fetch(url)
 
-            const responseData = await response.json()
+            const responseData = await response.text()
 
             const parsedResponseURL = this.parseQuery(responseData as unknown as string);
 

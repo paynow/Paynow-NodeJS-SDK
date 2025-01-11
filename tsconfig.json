@@ -7,10 +7,13 @@
         "removeComments": true,
         "preserveConstEnums": true,
         "outDir": "dist",
-        "sourceMap": true
+        "sourceMap": true,
+        "lib": ["dom", "esnext"],
+        "moduleResolution": "node"
     },
     "include": [
-        "src"
+        "src",
+        "tests"
     ],
     "exclude": [
         "node_modules",
