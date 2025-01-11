@@ -239,6 +239,7 @@ var InitResponse = function InitResponse(data) {
         this.error = data.error;
     } else {
         this.pollUrl = data.pollurl;
+        this.paynowReference = data.paynowreference;
         if (this.hasRedirect) {
             this.redirectUrl = data.browserurl;
         }
@@ -309,7 +310,7 @@ var Cart = /*#__PURE__*/ function() {
                 this.items.forEach(function(item, index) {
                     summary = summary.concat(item.title + ", ");
                 });
-                summary = summary.slice(0, summary.length - 3);
+                summary = summary.slice(0, summary.length - 2);
                 return summary;
             }
         }
@@ -543,7 +544,6 @@ var Paynow = /*#__PURE__*/ function() {
                                 ];
                             case 3:
                                 responseData = _state.sent();
-                                console.log("In Paynow.initMobileResponse: Response Data: ".concat(responseData));
                                 return [
                                     2,
                                     _this.parse(responseData)
@@ -652,7 +652,6 @@ var Paynow = /*#__PURE__*/ function() {
                 var query = {};
                 var pairs = (queryString[0] === "?" ? queryString.slice(1) : queryString).split("&");
                 for(var i = 0; i < pairs.length; i++){
-                    console.log("Raw pair: ".concat(pairs[i]));
                     var pair = pairs[i].split("=");
                     query[decodeURIComponent(pair[0]).toLowerCase()] = decodeURIComponent(pair[1].replace(/\+/g, " "));
                 }
