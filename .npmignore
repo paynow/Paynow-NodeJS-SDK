@@ -1,5 +1,6 @@
 src/
 node_modules/
 tests/
+coverage/
 tsconfig.json
 tsup.config.ts
