@@ -233,7 +233,7 @@ export  class Paynow {
       let parsedResponseURL = this.parseQuery(response as unknown as string);
 
       if (
-        parsedResponseURL.status.toString() !== "error" &&
+        parsedResponseURL.status.toString().toLowerCase() !== RESPONSE_ERROR &&
         !this.verifyHash(parsedResponseURL)
       ) {
         throw new Error("Hashes do not match!");

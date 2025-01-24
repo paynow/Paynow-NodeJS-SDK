@@ -169,7 +169,7 @@ var Paynow = (function () {
         }
         if (response) {
             var parsedResponseURL = this.parseQuery(response);
-            if (parsedResponseURL.status.toString() !== "error" &&
+            if (parsedResponseURL.status.toString().toLowerCase() !== constants_1.RESPONSE_ERROR &&
                 !this.verifyHash(parsedResponseURL)) {
                 throw new Error("Hashes do not match!");
             }
