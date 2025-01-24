@@ -389,7 +389,7 @@ export  class Paynow {
    * @param url
    * @returns {PromiseLike<InitResponse> | Promise<InitResponse>}
    */
-  async pollTransaction(url: string): Promise<PromiseLike<InitResponse> | Promise<InitResponse>> {
+  public async pollTransaction(url: string): Promise<PromiseLike<InitResponse> | Promise<InitResponse>> {
     let response = await axios({
       method: "POST",
       url: url,
