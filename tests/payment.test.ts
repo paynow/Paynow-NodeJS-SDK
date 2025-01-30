@@ -1,4 +1,4 @@
-import Payment from './../src/types/payment'
+import Payment from '../src/types/payment'
 
 let payment = new Payment("test-reference", "pay@abc.xyz");
 
