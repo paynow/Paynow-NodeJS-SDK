@@ -1,5 +1,4 @@
 import Payment from "./types/payment";
-import * as http from "request-promise-native";
 import {
   URL_INITIATE_MOBILE_TRANSACTION,
   URL_INITIATE_TRANSACTION,
@@ -8,8 +7,7 @@ import {
   GOOGLE_QR_PREFIX,
   INNBUCKS_DEEPLINK_PREFIX,
 } from "./constants";
-import request = require("request");
-
+import axios, {AxiosResponse} from "axios";
 //#region StatusResponse Class
 /**
  *
@@ -164,14 +162,15 @@ export  class Paynow {
   init(payment: Payment) {
     this.validate(payment);
     let data = this.build(payment);
-    return http({
+    return axios({
       method: "POST",
-      uri: URL_INITIATE_TRANSACTION,
-      form: data,
-      json: false,
-    })
-      .then((response: Response) => {
-        return this.parse(response);
+      url: URL_INITIATE_TRANSACTION,
+      data: data,
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    }).then((response) => {
+        return this.parse(response.data);
       })
       .catch(function (err) {
         console.log("An error occured while initiating transaction", err);
@@ -181,30 +180,31 @@ export  class Paynow {
   /**
    * Initialize a new mobile transaction with PayNow
    * @param {Payment} payment
+   * @param phone - The phone number to be used for the payment
+   * @param method - The express checkout method.
    * @returns {PromiseLike<InitResponse> | Promise<InitResponse>} the response from the initiation of the transaction
    */
-  initMobile(payment: Payment, phone: string, method: string) {
+  async initMobile(payment: Payment, phone: string, method: string): Promise<PromiseLike<InitResponse> | Promise<InitResponse>> {
     this.validate(payment);
 
     if (!this.isValidEmail(payment.authEmail))
-      this.fail(
-        "Invalid email. Please ensure that you pass a valid email address when initiating a mobile payment"
-      );
+      this.fail("Invalid email. Please ensure that you pass a valid email address when initiating a mobile payment");
 
     let data = this.buildMobile(payment, phone, method);
 
-    return http({
-      method: "POST",
-      uri: URL_INITIATE_MOBILE_TRANSACTION,
-      form: data,
-      json: false,
-    })
-      .then((response: Response) => {
-        return this.parse(response);
-      })
-      .catch(function (err) {
-        console.log("An error occured while initiating transaction", err);
+    try {
+      const response = await axios({
+        method: "POST",
+        url: URL_INITIATE_MOBILE_TRANSACTION,
+        data: data,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
       });
+      return this.parse(response.data);
+    } catch (err) {
+      console.log("An error occured while initiating transaction", err);
+    }
   }
 
   /**
@@ -233,7 +233,7 @@ export  class Paynow {
       let parsedResponseURL = this.parseQuery(response as unknown as string);
 
       if (
-        parsedResponseURL.status.toString() !== "error" &&
+        parsedResponseURL.status.toString().toLowerCase() !== RESPONSE_ERROR &&
         !this.verifyHash(parsedResponseURL)
       ) {
         throw new Error("Hashes do not match!");
@@ -389,15 +389,13 @@ export  class Paynow {
    * @param url
    * @returns {PromiseLike<InitResponse> | Promise<InitResponse>}
    */
-  pollTransaction(url: string) {
-    return http({
+  public async pollTransaction(url: string): Promise<PromiseLike<InitResponse> | Promise<InitResponse>> {
+    let response = await axios({
       method: "POST",
-      uri: url,
-      form: null,
-      json: false,
-    }).then((response: Response) => {
-      return this.parse(response);
+      url: url,
+      data: null,
     });
+    return this.parse(response.data);
   }
 
   /**
@@ -405,7 +403,7 @@ export  class Paynow {
    * @param response
    * @returns {StatusResponse}
    */
-  parseStatusUpdate(response: any) {
+  parseStatusUpdate(response: any): StatusResponse {
     if (response.length > 0) {
       response = this.parseQuery(response);
 
