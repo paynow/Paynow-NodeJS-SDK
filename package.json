@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "jest",
-    "build:tsc": "tsc",
+    "build:tsc": "tsc --removeComments --sourceMap",
     "build": "npm run build:tsc"
   },
   "repository": {
@@ -32,8 +32,5 @@
     "@types/node": "^18.0.0",
     "jest": "^29.7.0",
     "typescript": "^5.7.3"
-  },
-  "files": [
-    "dist/**/*"
-  ]
+  }
 }
